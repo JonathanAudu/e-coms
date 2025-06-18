@@ -71,26 +71,38 @@
                     <a href="{{ route('contact') }}" class="nav-item nav-link {{ request()->routeIs('contact') ? 'active' : '' }}">Contact Us</a>
                 </div>
 
-                 <div class="d-flex align-items-center m-3 me-0">
-                     <a href="#" class="position-relative me-4">
-                         <i class="far fa-heart fa-lg"></i>
-                         <span
-                             class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark"
-                             style="top: -5px; left: 12px; height: 18px; min-width: 18px; font-size: 12px;">3</span>
-                     </a>
+                <div class="d-flex align-items-center m-3 me-0">
+                    <!-- Wishlist -->
+                    <a href="#" class="position-relative me-4">
+                        <i class="far fa-heart fa-lg"></i>
+                        <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark"
+                              style="top: -5px; left: 12px; height: 18px; min-width: 18px; font-size: 12px;">3</span>
+                    </a>
 
-                     <a href="#" class="position-relative me-4">
-                         <i class="fa fa-shopping-bag fa-lg"></i>
-                         <span
-                             class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark"
-                             style="top: -5px; left: 12px; height: 18px; min-width: 18px; font-size: 12px;">3</span>
-                     </a>
+                    <!-- Cart -->
+                    <a href="#" class="position-relative me-4">
+                        <i class="fa fa-shopping-bag fa-lg"></i>
+                        <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark"
+                              style="top: -5px; left: 12px; height: 18px; min-width: 18px; font-size: 12px;">3</span>
+                    </a>
 
-                     <button class="btn border border-secondary btn-sm rounded-circle bg-white" data-bs-toggle="modal"
-                         data-bs-target="#searchModal" style="width: 38px; height: 38px;">
-                         <i class="fas fa-search text-primary"></i>
-                     </button>
-                 </div>
+                    <!-- Currency Selector -->
+                    <form action="{{ route('currency.change') }}" method="POST" class="me-3">
+                        @csrf
+                        <select name="currency" onchange="this.form.submit()" class="form-select form-select-sm" style="width: auto;">
+                            <option value="NGN" {{ session('currency', 'NGN') == 'NGN' ? 'selected' : '' }}>₦ NGN</option>
+                            <option value="USD" {{ session('currency') == 'USD' ? 'selected' : '' }}>$ USD</option>
+                            <option value="GBP" {{ session('currency') == 'GBP' ? 'selected' : '' }}>£ GBP</option>
+                        </select>
+                    </form>
+
+                    <!-- Search Button -->
+                    <button class="btn border border-primary btn-sm rounded-circle bg-white" data-bs-toggle="modal"
+                            data-bs-target="#searchModal" style="width: 38px; height: 38px;">
+                        <i class="fas fa-search text-primary"></i>
+                    </button>
+                </div>
+
 
              </div>
          </nav>

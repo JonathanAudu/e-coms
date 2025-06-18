@@ -1,5 +1,8 @@
 @extends("frontend.layouts.master")
-
+@inject('currencyService', 'App\Services\CurrencyService')
+@php
+    $currency = session('currency', 'NGN');
+@endphp
 @section("title", "")
 
 @section("main-content")
@@ -23,13 +26,13 @@
                                     $photo = explode(",", $product_detail->photo);
                                 @endphp
                                 <img src="{{ $photo[0] }}" alt="{{ $photo[0] }}" class="img-fluid rounded"
-                                    alt="{{ $product_detail->title }}">
+                                    alt="{{ $product_detail->name }}">
                             </div>
                         </div>
                         <div class="col-lg-6">
                             <h4 class="fw-bold mb-3">{{ ucfirst($product_detail->slug) }}</h4>
                             <p class="fw-bold mb-3">Category: {{ ucfirst($product_detail->category->slug) }}</p>
-                            <h5 class="fw-bold mb-3">₦ {{ number_format($product_detail->price, 2) }}</h5>
+                            <h5 class="fw-bold mb-3">{{ $currencyService->convert($product_detail->price, $currency) }}</h5>
 
                             <p class="mb-4">
                                 {{ \Illuminate\Support\Str::limit(strip_tags($product_detail->description), 150) }}
@@ -137,7 +140,7 @@
                                             <h6 class="mb-2">{{ $fProduct->name }}</h6>
                                         </a>
                                         <div class="d-flex mb-2">
-                                            <h6 class="fw-bold me-2">₦{{ number_format($fProduct->price, 2) }}</h6>
+                                            <h6 class="fw-bold me-2">{{ $currencyService->convert($fProduct->price, $currency) }}</h6>
                                         </div>
                                     </div>
                                 </div>
@@ -166,7 +169,7 @@
                                 </a>
                                 <p>{{ \Illuminate\Support\Str::limit(strip_tags($product->description), 20) }}</p>
                                 <div class="d-flex justify-content-between flex-lg-wrap">
-                                    <p class="text-dark fs-5 fw-bold">₦{{ number_format($product->price, 2) }}</p>
+                                    <p class="text-dark fs-5 fw-bold">{{ $currencyService->convert($fProduct->price, $currency) }}</p>
                                     <a href="{{ route('product-detail', $product->slug) }}"
                                        class="btn border border-secondary rounded-pill px-3 py-1 mb-4 text-primary">
                                         <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart

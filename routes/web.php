@@ -40,6 +40,7 @@ Auth::routes(['register' => false]);
 
 Route::get('/', [FrontendController::class, 'home'])->name('home');
 Route::get('/home', [FrontendController::class, 'index']);
+Route::post('/currency/change', [FrontendController::class, 'changeCurrency'])->name('currency.change');
 
 
 Route::get('user/login', [FrontendController::class, 'login'])->name('login.form');

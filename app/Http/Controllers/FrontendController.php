@@ -17,8 +17,27 @@ class FrontendController extends Controller
     {
         $products = Product::orderBy('id', 'DESC')->limit(8)->get();
         $categories = Category::orderBy('title', 'DESC')->limit(5)->get();
+        $catProducts = Product::latest()->take(12)->get();
+        $catgroup = Category::whereHas('products')->with('products')->orderBy('title')->get();
+        $relatedProducts = Product::with('category')
+        ->inRandomOrder()
+        ->limit(10)
+        ->get();
 
-        return view('frontend.index', compact('products', 'categories'));
+        $currency = session('currency', 'NGN');
+
+        return view('frontend.index', compact('products', 'categories', 'catProducts', 'catgroup', 'relatedProducts', 'currency'));
+    }
+
+    public function changeCurrency(Request $request)
+    {
+        $request->validate([
+            'currency' => 'required|in:NGN,USD,GBP',
+        ]);
+
+        session(['currency' => $request->currency]);
+
+        return redirect()->back();
     }
 
     public function aboutUs()
