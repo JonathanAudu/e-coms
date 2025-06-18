@@ -21,6 +21,18 @@ class FrontendController extends Controller
         return view('frontend.index', compact('products', 'categories'));
     }
 
+    public function aboutUs()
+    {
+        $categories = Category::orderBy('title', 'DESC')->limit(5)->get();
+        return view('frontend.pages.about-us', compact('categories'));
+    }
+
+    public function contact()
+    {
+        $categories = Category::orderBy('title', 'DESC')->limit(5)->get();
+        return view('frontend.pages.contact-us', compact('categories'));
+    }
+
 
     public function login(){
         $categories = Category::orderBy('title', 'DESC')->limit(5)->get();
@@ -87,9 +99,13 @@ class FrontendController extends Controller
             $productQuery->where('price', '<=', $request->max_price);
         }
 
+        if ($request->filled('keyword')) {
+            $productQuery->where('name', 'like', '%' . $request->keyword . '%');
+        }
+
         $products = $productQuery->paginate(6);
 
-        $categories = Category::withCount('products')->orderBy('title', 'ASC')->limit(5)->get();
+        $categories = Category::withCount('products')->orderBy('title', 'ASC')->limit(8)->get();
 
         $featuredProducts = Product::inRandomOrder()->limit(3)->get();
 
@@ -97,6 +113,23 @@ class FrontendController extends Controller
             'category', 'products', 'categories', 'featuredProducts'
         ));
     }
+
+
+    public function productDetail($slug)
+    {
+        $product_detail = Product::where('slug', $slug)->with('category')->firstOrFail();
+        $categories = Category::orderBy('title', 'DESC')->limit(5)->get();
+        $featuredProducts = Product::inRandomOrder()->limit(3)->get();
+        $catwithCount = Category::withCount('products')->orderBy('title', 'ASC')->limit(8)->get();
+        $relatedProducts = Product::with('category')
+                            ->where('id', '!=', $product_detail->id)
+                            ->inRandomOrder()
+                            ->limit(10)
+                            ->get();
+
+        return view('frontend.pages.product_detail', compact('product_detail', 'categories','featuredProducts', 'catwithCount', 'relatedProducts'));
+    }
+
 
 
 

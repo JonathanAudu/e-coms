@@ -47,8 +47,10 @@ Route::post('user/login', [FrontendController::class, 'loginSubmit'])->name('log
 Route::get('user/logout', [FrontendController::class, 'logout'])->name('user.logout');
 Route::get('user/register', [FrontendController::class, 'register'])->name('register.form');
 Route::post('user/register', [FrontendController::class, 'registerSubmit'])->name('register.submit');
+Route::get('/about-us', [FrontendController::class, 'aboutUs'])->name('about-us');
+Route::get('/contact', [FrontendController::class, 'contact'])->name('contact');
 Route::get('/category/{slug}', [FrontendController::class, 'categoryProducts'])->name('category.products');
-
+Route::get('product-detail/{slug}', [FrontendController::class, 'productDetail'])->name('product-detail');
 
 
  // Reset password

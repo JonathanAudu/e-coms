@@ -4,7 +4,7 @@
         <div class="pb-4 mb-4" style="border-bottom: 1px solid rgba(226, 175, 24, 0.5) ;">
             <div class="row g-4">
                 <div class="col-lg-3">
-                    <a href="#">
+                    <a href="{{ route('home') }}">
                         <h2 class="text-primary mb-0">CHARIS AGROBASE</h2>
                         <p class="text-secondary mb-0">Exporting Nature's Best. Fresh, Fast and Reliable</p>
                     </a>

@@ -37,7 +37,7 @@
      </div>
      <div class="container px-0">
          <nav class="navbar navbar-light bg-white navbar-expand-xl">
-             <a href="index.html" class="navbar-brand">
+             <a href="{{ route('home') }}" class="navbar-brand">
                  <img src={{ asset("asset/img/CharisAgroBase-Logo.png") }} alt="charisenterpriselogo" class="img-fluid"
                      style="max-height: 80px;">
              </a>
@@ -47,23 +47,30 @@
                  <span class="fa fa-bars text-primary"></span>
              </button>
              <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
-                 <div class="navbar-nav mx-auto">
-                     <a href="index.html" class="nav-item nav-link active">Home</a>
-                     <a href="shop.html" class="nav-item nav-link">About Us</a>
-                     <a href="shop-detail.html" class="nav-item nav-link">Products</a>
-                     <div class="nav-item dropdown">
-                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Category</a>
-                         <div class="dropdown-menu m-0 bg-secondary rounded-0">
-                             @foreach ($categories as $category)
-                                 <a href="{{ route("category.products", $category->slug) }}" class="dropdown-item">
-                                     {{ $category->title }}
-                                 </a>
-                             @endforeach
-                         </div>
-                     </div>
-                     <a href="contact.html" class="nav-item nav-link">Blog</a>
-                     <a href="contact.html" class="nav-item nav-link">Contact Us</a>
-                 </div>
+                <div class="navbar-nav mx-auto">
+                    <a href="{{ route('home') }}" class="nav-item nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Home</a>
+
+                    <a href="{{ route('about-us') }}" class="nav-item nav-link {{ request()->routeIs('about-us') ? 'active' : '' }}">About Us</a>
+
+                    <a href="" class="nav-item nav-link {{ request()->routeIs('product.list') ? 'active' : '' }}">Products</a>
+
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle {{ request()->is('category/*') ? 'active' : '' }}" data-bs-toggle="dropdown">Category</a>
+                        <div class="dropdown-menu m-0 bg-secondary rounded-0">
+                            @foreach ($categories as $category)
+                                <a href="{{ route('category.products', $category->slug) }}"
+                                   class="dropdown-item {{ request()->is('category/' . $category->slug) ? 'active' : '' }}">
+                                    {{ $category->title }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <a href="" class="nav-item nav-link {{ request()->routeIs('blog') ? 'active' : '' }}">Blog</a>
+
+                    <a href="{{ route('contact') }}" class="nav-item nav-link {{ request()->routeIs('contact') ? 'active' : '' }}">Contact Us</a>
+                </div>
+
                  <div class="d-flex align-items-center m-3 me-0">
                      <a href="#" class="position-relative me-4">
                          <i class="far fa-heart fa-lg"></i>
