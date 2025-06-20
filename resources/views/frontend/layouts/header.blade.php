@@ -80,11 +80,29 @@
                     </a>
 
                     <!-- Cart -->
-                    <a href="#" class="position-relative me-4">
-                        <i class="fa fa-shopping-bag fa-lg"></i>
+                    @php
+                    $cartCount = 0;
+
+                    if (auth()->check()) {
+                        $cartCount = \App\Models\Cart::where('user_id', auth()->id())->sum('quantity');
+                    } else {
+                        $cart = session('cart', []);
+                        foreach ($cart as $item) {
+                            $cartCount += $item['quantity'];
+                        }
+                    }
+                @endphp
+
+                <a href="{{ route('cart.index') }}" class="position-relative me-4">
+                    <i class="fa fa-shopping-bag fa-lg"></i>
+                    @if($cartCount > 0)
                         <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark"
-                              style="top: -5px; left: 12px; height: 18px; min-width: 18px; font-size: 12px;">3</span>
-                    </a>
+                              style="top: -5px; left: 12px; height: 18px; min-width: 18px; font-size: 12px;">
+                            {{ $cartCount }}
+                        </span>
+                    @endif
+                </a>
+
 
                     <!-- Currency Selector -->
                     <form action="{{ route('currency.change') }}" method="POST" class="me-3">

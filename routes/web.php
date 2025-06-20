@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Auth;
 use UniSharp\LaravelFilemanager\Lfm;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\MessageController;
@@ -64,6 +65,13 @@ Route::get('product-detail/{slug}', [FrontendController::class, 'productDetail']
  Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
  Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
+
+ Route::prefix('cart')->name('cart.')->group(function () {
+    Route::get('/', [CartController::class, 'index'])->name('index');
+    Route::post('/add', [CartController::class, 'addToCart'])->name('add');
+    Route::post('/update', [CartController::class, 'cartUpdate'])->name('update');
+    Route::post('/remove', [CartController::class, 'cartDelete'])->name('remove');
+});
 
 //  Admin Dashboard
  Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'admin']], function () {

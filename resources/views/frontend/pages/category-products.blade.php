@@ -1,7 +1,7 @@
 @extends("frontend.layouts.master")
-@inject('currencyService', 'App\Services\CurrencyService')
+@inject("currencyService", "App\Services\CurrencyService")
 @php
-    $currency = session('currency', 'NGN');
+    $currency = session("currency", "NGN");
 @endphp
 @section("title", "")
 
@@ -91,7 +91,8 @@
                                                     <h6 class="mb-1">{{ $fProduct->name }}</h6>
                                                 </a>
                                                 <div class="d-flex">
-                                                    <h6 class="fw-bold me-2">{{ $currencyService->convert($fProduct->price, $currency) }}</h6>
+                                                    <h6 class="fw-bold me-2">
+                                                        {{ $currencyService->convert($fProduct->price, $currency) }}</h6>
                                                 </div>
                                             </div>
                                         </div>
@@ -131,10 +132,16 @@
                                                 <div class="d-flex justify-content-between flex-lg-wrap">
                                                     <p class="text-dark fs-5 fw-bold mb-0">
                                                         {{ $currencyService->convert($product->price, $currency) }}</p>
-                                                    <a href="#"
-                                                        class="btn border border-secondary rounded-pill px-3 text-primary">
-                                                        <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
-                                                    </a>
+                                                    <form action="{{ route("cart.add") }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        <input type="hidden" name="product_id"
+                                                            value="{{ $product->id }}">
+                                                        <button type="submit"
+                                                            class="btn border border-secondary rounded-pill px-3 text-primary">
+                                                            <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
+                                                        </button>
+                                                    </form>
+
                                                 </div>
                                             </div>
                                         </div>
