@@ -51,6 +51,7 @@ Route::post('user/register', [FrontendController::class, 'registerSubmit'])->nam
 Route::get('/about-us', [FrontendController::class, 'aboutUs'])->name('about-us');
 Route::get('/contact', [FrontendController::class, 'contact'])->name('contact');
 Route::get('/category/{slug}', [FrontendController::class, 'categoryProducts'])->name('category.products');
+Route::get('/products', [FrontendController::class, 'allProducts'])->name('product-lists');
 Route::get('product-detail/{slug}', [FrontendController::class, 'productDetail'])->name('product-detail');
 
 

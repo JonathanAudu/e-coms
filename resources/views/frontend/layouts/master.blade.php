@@ -10,11 +10,10 @@
         <div class="spinner-grow text-primary" role="status"></div>
     </div>
     <!-- Spinner End -->
-
-	{{-- @include('frontend.layouts.notification') --}}
 	<!-- Header -->
 	@include('frontend.layouts.header')
 	<!--/ End Header -->
+    @include('frontend.layouts.notification')
 	@yield('main-content')
 
 	@include('frontend.layouts.footer')

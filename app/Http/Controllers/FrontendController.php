@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Auth;
-use Session;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
+use App\Services\CurrencyService;
 
 class FrontendController extends Controller
 {
@@ -20,9 +21,9 @@ class FrontendController extends Controller
         $catProducts = Product::latest()->take(12)->get();
         $catgroup = Category::whereHas('products')->with('products')->orderBy('title')->get();
         $relatedProducts = Product::with('category')
-        ->inRandomOrder()
-        ->limit(10)
-        ->get();
+            ->inRandomOrder()
+            ->limit(10)
+            ->get();
 
         $currency = session('currency', 'NGN');
 
@@ -53,53 +54,58 @@ class FrontendController extends Controller
     }
 
 
-    public function login(){
+    public function login()
+    {
         $categories = Category::orderBy('title', 'DESC')->limit(5)->get();
         return view('frontend.pages.login', compact('categories'));
     }
-    public function loginSubmit(Request $request){
-        $data= $request->all();
-        if(Auth::attempt(['email' => $data['email'], 'password' => $data['password']])){
-            Session::put('user',$data['email']);
-            request()->session()->flash('success','Successfully login');
+    public function loginSubmit(Request $request)
+    {
+        $data = $request->all();
+        if (Auth::attempt(['email' => $data['email'], 'password' => $data['password']])) {
+            Session::put('user', $data['email']);
+            request()->session()->flash('success', 'Successfully login');
             return redirect()->route('home');
-        }
-        else{
-            request()->session()->flash('error','Invalid email and password pleas try again!');
+        } else {
+            request()->session()->flash('error', 'Invalid email and password pleas try again!');
             return redirect()->back();
         }
     }
 
-    public function logout(){
+
+
+    public function logout()
+    {
         Session::forget('user');
         Auth::logout();
-        request()->session()->flash('success','Logout successfully');
+        request()->session()->flash('success', 'Logout successfully');
         return back();
     }
 
 
-    public function register(){
+    public function register()
+    {
         $categories = Category::orderBy('title', 'DESC')->limit(5)->get();
         return view('frontend.pages.register', compact('categories'));
     }
 
-    public function registerSubmit(Request $request){
+    public function registerSubmit(Request $request)
+    {
         // return $request->all();
-        $this->validate($request,[
-            'name'=>'string|required|min:2',
-            'email'=>'string|required|unique:users,email',
-            'password'=>'required|min:6|confirmed',
+        $this->validate($request, [
+            'name' => 'string|required|min:2',
+            'email' => 'string|required|unique:users,email',
+            'password' => 'required|min:6|confirmed',
         ]);
-        $data=$request->all();
+        $data = $request->all();
         // dd($data);
-        $check=$this->create($data);
-        Session::put('user',$data['email']);
-        if($check){
-            request()->session()->flash('success','Successfully registered');
+        $check = $this->create($data);
+        Session::put('user', $data['email']);
+        if ($check) {
+            request()->session()->flash('success', 'Successfully registered');
             return redirect()->route('home');
-        }
-        else{
-            request()->session()->flash('error','Please try again!');
+        } else {
+            request()->session()->flash('error', 'Please try again!');
             return back();
         }
     }
@@ -129,9 +135,57 @@ class FrontendController extends Controller
         $featuredProducts = Product::inRandomOrder()->limit(3)->get();
 
         return view('frontend.pages.category-products', compact(
-            'category', 'products', 'categories', 'featuredProducts'
+            'category',
+            'products',
+            'categories',
+            'featuredProducts'
         ));
     }
+
+    public function allProducts(Request $request, CurrencyService $currencyService)
+    {
+        $currency = session('currency', 'NGN');
+        $rate = $currencyService->getRates();
+        $rates = $currencyService->getRates();
+
+$rate = isset($rates[$currency]) && is_numeric($rates[$currency]) && $rates[$currency] > 0
+    ? floatval($rates[$currency])
+    : 1;
+
+        $productQuery = Product::query()->inRandomOrder();
+
+        // Filter by keyword
+        if ($request->filled('keyword')) {
+            $productQuery->where('name', 'like', '%' . $request->keyword . '%')
+                ->orWhere('slug', 'like', '%' . $request->keyword . '%')
+                ->orWhere('description', 'like', '%' . $request->keyword . '%')
+                ->orWhere('price', 'like','%' . $request->keyword . '%');
+        }
+
+        // Filter by price range
+        if ($request->filled('min_price')) {
+            $min = floatval($request->min_price) / $rate;
+            $productQuery->where('price', '>=', $min);
+        }
+
+        if ($request->filled('max_price')) {
+            $max = floatval($request->max_price) / $rate;
+            $productQuery->where('price', '<=', $max);
+        }
+
+        $products = $productQuery->paginate(6);
+
+        $categories = Category::withCount('products')
+            ->has('products')
+            ->orderBy('title', 'ASC')
+            ->limit(8)
+            ->get();
+
+        $featuredProducts = Product::inRandomOrder()->limit(3)->get();
+
+        return view('frontend.pages.all-products', compact('products', 'categories', 'featuredProducts', 'currency'));
+    }
+
 
 
     public function productDetail($slug)
@@ -141,12 +195,12 @@ class FrontendController extends Controller
         $featuredProducts = Product::inRandomOrder()->limit(3)->get();
         $catwithCount = Category::withCount('products')->orderBy('title', 'ASC')->limit(8)->get();
         $relatedProducts = Product::with('category')
-                            ->where('id', '!=', $product_detail->id)
-                            ->inRandomOrder()
-                            ->limit(10)
-                            ->get();
+            ->where('id', '!=', $product_detail->id)
+            ->inRandomOrder()
+            ->limit(10)
+            ->get();
 
-        return view('frontend.pages.product_detail', compact('product_detail', 'categories','featuredProducts', 'catwithCount', 'relatedProducts'));
+        return view('frontend.pages.product_detail', compact('product_detail', 'categories', 'featuredProducts', 'catwithCount', 'relatedProducts'));
     }
 
 
@@ -155,17 +209,19 @@ class FrontendController extends Controller
 
 
 
-    public function create(array $data){
+    public function create(array $data)
+    {
         return User::create([
-            'name'=>$data['name'],
-            'email'=>$data['email'],
-            'password'=>Hash::make($data['password']),
-            'status'=>'active'
-            ]);
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+            'status' => 'active'
+        ]);
     }
 
 
-    public function showResetForm(){
+    public function showResetForm()
+    {
         return view('auth.passwords.old-reset');
     }
 }
