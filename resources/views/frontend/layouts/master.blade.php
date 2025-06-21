@@ -13,7 +13,7 @@
 	<!-- Header -->
 	@include('frontend.layouts.header')
 	<!--/ End Header -->
-    @include('frontend.layouts.notification')
+   
 	@yield('main-content')
 
 	@include('frontend.layouts.footer')

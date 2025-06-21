@@ -7,7 +7,9 @@ use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -72,6 +74,18 @@ Route::get('product-detail/{slug}', [FrontendController::class, 'productDetail']
     Route::post('/update', [CartController::class, 'cartUpdate'])->name('update');
     Route::post('/remove', [CartController::class, 'cartDelete'])->name('remove');
 });
+
+
+Route::controller(OrderController::class)->group(function () {
+    Route::get('/checkout', 'checkoutForm')->name('checkout.form');
+    Route::post('/checkout', 'placeOrder')->name('checkout.place');
+    Route::get('/thank-you', 'thankYou')->name('checkout.thankyou');
+});
+
+
+Route::get('/payment/paystack/{order}', [PaymentController::class, 'redirectToPaystack'])->name('paystack.checkout');
+Route::get('/payment/paystack/callback', [PaymentController::class, 'handleGatewayCallback'])->name('paystack.callback');
+
 
 //  Admin Dashboard
  Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'admin']], function () {

@@ -35,6 +35,7 @@
          </div>
 
      </div>
+     @include('frontend.layouts.notification')
      <div class="container px-0">
          <nav class="navbar navbar-light bg-white navbar-expand-xl">
              <a href="{{ route('home') }}" class="navbar-brand">
@@ -152,3 +153,15 @@
 </form>
 
  <!-- Modal Search End -->
+ @push('scripts')
+ <script>
+     setTimeout(() => {
+         const alert = document.querySelector('.flash-alert');
+         if (alert) {
+             alert.classList.add('fade');
+             alert.style.opacity = '0';
+             setTimeout(() => alert.remove(), 500); 
+         }
+     }, 3000);
+ </script>
+ @endpush
