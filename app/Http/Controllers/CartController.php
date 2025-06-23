@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Wishlist;
 use Illuminate\Http\Request;
 
 
@@ -23,6 +24,12 @@ class CartController extends Controller
             ]);
             $item->quantity += $quantity;
             $item->save();
+
+             // Remove from wishlist if it exists
+            Wishlist::where('user_id', auth()->id())
+                ->where('product_id', $product->id)
+                ->delete();
+                
         } else {
             // Store in session
             $cart = session()->get('cart', []);
@@ -55,7 +62,7 @@ class CartController extends Controller
     ->orderBy('title', 'ASC')
     ->limit(8)
     ->get();
-    
+
 
     return view('frontend.pages.cart', compact('cartItems', 'categories'));
 }

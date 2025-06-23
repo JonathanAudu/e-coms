@@ -1,4 +1,8 @@
 @extends('backend.layouts.master')
+@inject('currencyService', 'App\Services\CurrencyService')
+@php
+    $currency = session('currency', 'NGN');
+@endphp
 
 @section('main-content')
 
@@ -40,6 +44,15 @@
           <span class="text-danger">{{$message}}</span>
           @enderror
         </div>
+
+        <div class="form-group">
+            <label for="weight" class="col-form-label">Weight (kg) <span class="text-danger">*</span></label>
+            <input id="weight" type="number" step="0.01" min="0.01" name="weight" placeholder="Enter weight in kg"  value="{{ old('weight', 1) }}" class="form-control">
+            @error('weight')
+            <span class="text-danger">{{$message}}</span>
+            @enderror
+          </div>
+
 
         <div class="form-group">
           <label for="discount" class="col-form-label">Discount(%)</label>

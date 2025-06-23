@@ -51,6 +51,7 @@ class ProductController extends Controller
             'stock' => 'required|numeric',
             'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric',
+            'weight' => 'required|numeric',
             'discount' => 'nullable|numeric',
         ]);
         $slug = Helpers::generateUniqueSlug($request->name, Product::class);
@@ -109,6 +110,7 @@ class ProductController extends Controller
             'stock' => 'required|numeric',
             'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric',
+            'weight' => 'required|numeric',
             'discount' => 'nullable|numeric',
         ]);
 

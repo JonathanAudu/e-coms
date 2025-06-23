@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Cart;
 class Product extends Model
 {
-    protected $fillable=['name','slug','description','category_id','price','discount','photo','stock',];
+    protected $fillable=['name','slug','description','category_id','price','weight','discount','photo','stock',];
 
     public function category() {
         return $this->belongsTo(Category::class);
@@ -16,9 +16,11 @@ class Product extends Model
         return $this->hasMany(Cart::class)->whereNotNull('order_id');
     }
 
-    public function wishlists(){
-        return $this->hasMany(Wishlist::class)->whereNotNull('cart_id');
+    public function wishlistedBy()
+    {
+        return $this->hasMany(Wishlist::class);
     }
+
 
     public static function countActiveProduct(){
         $data=Product::count();

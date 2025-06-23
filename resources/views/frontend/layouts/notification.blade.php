@@ -3,3 +3,8 @@
         {{ session("success") }}
     </div>
 @endif
+@if(session('error'))
+    <div class="alert alert-danger text-center flash-alert">
+        {{ session("error") }}
+    </div>
+@endif

@@ -17,14 +17,33 @@
             <p>{{ \Illuminate\Support\Str::words(strip_tags($product->description), 4, "...") }}</p>
             <div class="d-flex justify-content-between flex-lg-wrap">
                 <p class="text-dark fs-5 fw-bold mb-0">{{ $currencyService->convert($product->price, $currency) }}</p>
+                <div class="d-flex gap-2">
+                @auth
+                    <form action="{{ route('wishlist.store', $product->id) }}" method="POST" >
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <button type="submit"
+                                class="btn btn-outline-danger rounded-circle"
+                                data-bs-toggle="tooltip" data-bs-placement="top" title="Add to Wishlist">
+                            <i class="fa fa-heart"></i>
+                        </button>
+                    </form>
+                    @else
+                    <a href="{{ route('login.form') }}" class="btn btn-outline-danger rounded-circle"
+                       data-bs-toggle="tooltip" data-bs-placement="top" title="Login to Wishlist">
+                        <i class="fa fa-heart"></i>
+                    </a>
+                @endauth
                 <form action="{{ route('cart.add') }}" method="POST" class="d-inline">
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
-                    <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary">
-                        <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
+                    <button type="submit"
+                            class="btn border border-secondary rounded-circle text-primary"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Add to Cart">
+                        <i class="fa fa-shopping-bag"></i>
                     </button>
                 </form>
-
+                </div>
             </div>
         </div>
     </div>

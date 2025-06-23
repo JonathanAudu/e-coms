@@ -20,6 +20,7 @@ class CreateProductsTable extends Migration
             $table->text('description')->nullable();
             $table->text('photo');
             $table->integer('stock')->default(1);
+            $table->float('weight')->default(1);
             $table->float('price');
             $table->float('discount')->default(0);
             $table->unsignedBigInteger('category_id')->nullable();

@@ -1,7 +1,7 @@
 @extends("frontend.layouts.master")
-@inject('currencyService', 'App\Services\CurrencyService')
+@inject("currencyService", "App\Services\CurrencyService")
 @php
-    $currency = session('currency', 'NGN');
+    $currency = session("currency", "NGN");
 @endphp
 @section("title", "")
 
@@ -36,29 +36,52 @@
 
                             <p class="mb-4">
                                 {{ \Illuminate\Support\Str::limit(strip_tags($product_detail->description), 150) }}
-                            <div class="input-group quantity mb-5" style="width: 100px;">
+                            </p>
+
+                            <div class="input-group quantity mb-4" style="width: 100px;">
                                 <div class="input-group-btn">
                                     <button class="btn btn-sm btn-minus rounded-circle bg-light border">
                                         <i class="fa fa-minus"></i>
                                     </button>
                                 </div>
-                                <input type="text" class="form-control form-control-sm text-center border-0"
-                                    value="1">
+                                <input type="text" class="form-control form-control-sm text-center border-0" value="1">
                                 <div class="input-group-btn">
                                     <button class="btn btn-sm btn-plus rounded-circle bg-light border">
                                         <i class="fa fa-plus"></i>
                                     </button>
                                 </div>
                             </div>
-                            <form action="{{ route('cart.add') }}" method="POST" class="d-inline">
-                                @csrf
-                                <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary">
-                                    <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
-                                </button>
-                            </form>
 
+                            <div class="d-flex gap-2">
+                                {{-- Add to Cart --}}
+                                <form action="{{ route("cart.add") }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <input type="hidden" name="product_id" value="{{ $product_detail->id }}">
+                                    <button type="submit" class="btn border border-secondary rounded-circle text-primary"
+                                            data-bs-toggle="tooltip" data-bs-placement="top" title="Add to Cart">
+                                        <i class="fa fa-shopping-bag"></i>
+                                    </button>
+                                </form>
+
+                                {{-- Add to Wishlist --}}
+                                @auth
+                                    <form action="{{ route("wishlist.store", $product_detail->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn border border-danger rounded-circle text-danger"
+                                                data-bs-toggle="tooltip" data-bs-placement="top" title="Add to Wishlist">
+                                            <i class="fa fa-heart"></i>
+                                        </button>
+                                    </form>
+                                @else
+                                    <a href="{{ route("login") }}"
+                                       class="btn border border-danger rounded-circle text-danger"
+                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Login to Wishlist">
+                                        <i class="fa fa-heart"></i>
+                                    </a>
+                                @endauth
+                            </div>
                         </div>
+
                         <div class="col-lg-12">
                             <nav>
                                 <div class="nav nav-tabs mb-3">
@@ -145,7 +168,8 @@
                                             <h6 class="mb-2">{{ $fProduct->name }}</h6>
                                         </a>
                                         <div class="d-flex mb-2">
-                                            <h6 class="fw-bold me-2">{{ $currencyService->convert($fProduct->price, $currency) }}</h6>
+                                            <h6 class="fw-bold me-2">
+                                                {{ $currencyService->convert($fProduct->price, $currency) }}</h6>
                                         </div>
                                     </div>
                                 </div>
@@ -161,22 +185,26 @@
                         @php $photo = explode(',', $product->photo); @endphp
                         <div class="border border-primary rounded position-relative vesitable-item">
                             <a href="{{ route("product-detail", $fProduct->slug) }}">
-                            <div class="vesitable-img" style="height: 200px; overflow: hidden;">
-                                <img src="{{ asset($photo[0]) }}" class="img-fluid w-100 h-100 object-fit-cover rounded-top" alt="{{ $product->name }}">
-                            </div>
-                            <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">
-                                {{ $product->category->title ?? 'Category' }}
-                            </div>
+                                <div class="vesitable-img" style="height: 200px; overflow: hidden;">
+                                    <img src="{{ asset($photo[0]) }}"
+                                        class="img-fluid w-100 h-100 object-fit-cover rounded-top"
+                                        alt="{{ $product->name }}">
+                                </div>
+                                <div class="text-white bg-primary px-3 py-1 rounded position-absolute"
+                                    style="top: 10px; right: 10px;">
+                                    {{ $product->category->title ?? "Category" }}
+                                </div>
                             </a>
                             <div class="p-4 pb-0 rounded-bottom">
                                 <a href="{{ route("product-detail", $fProduct->slug) }}">
-                                <h4>{{ $product->name }}</h4>
+                                    <h4>{{ $product->name }}</h4>
                                 </a>
                                 <p>{{ \Illuminate\Support\Str::limit(strip_tags($product->description), 20) }}</p>
                                 <div class="d-flex justify-content-between flex-lg-wrap">
-                                    <p class="text-dark fs-5 fw-bold">{{ $currencyService->convert($fProduct->price, $currency) }}</p>
-                                    <a href="{{ route('product-detail', $product->slug) }}"
-                                       class="btn border border-secondary rounded-pill px-3 py-1 mb-4 text-primary">
+                                    <p class="text-dark fs-5 fw-bold">
+                                        {{ $currencyService->convert($fProduct->price, $currency) }}</p>
+                                    <a href="{{ route("product-detail", $product->slug) }}"
+                                        class="btn border border-secondary rounded-pill px-3 py-1 mb-4 text-primary">
                                         <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
                                     </a>
                                 </div>

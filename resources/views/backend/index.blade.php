@@ -1,4 +1,8 @@
 @extends('backend.layouts.master')
+@inject('currencyService', 'App\Services\CurrencyService')
+@php
+    $currency = session('currency', 'NGN');
+@endphp
 @section('title','E-SHOP || DASHBOARD')
 @section('main-content')
 <div class="container-fluid">

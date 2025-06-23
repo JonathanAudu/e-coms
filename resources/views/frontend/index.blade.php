@@ -179,10 +179,37 @@
                             <p>{{ \Illuminate\Support\Str::limit(strip_tags($product->description), 20) }}</p>
                             <div class="d-flex justify-content-between flex-lg-wrap">
                                 <p class="text-dark fs-5 fw-bold">{{ $currencyService->convert($product->price, $currency) }}</p>
-                                <a href="{{ route('product-detail', $product->slug) }}"
-                                   class="btn border border-secondary rounded-pill px-3 py-1 mb-4 text-primary">
-                                    <i class="fa fa-shopping-bag me-1 text-primary"></i> Add to cart
+                                <div class="d-flex gap-2">
+                                @auth
+                                <form action="{{ route("wishlist.store", $product->id) }}"
+                                    method="POST">
+                                    @csrf
+                                    <input type="hidden" name="product_id"
+                                        value="{{ $product->id }}">
+                                    <button type="submit" class="btn btn-outline-danger rounded-circle"
+                                        data-bs-toggle="tooltip" data-bs-placement="top"
+                                        title="Add to Wishlist">
+                                        <i class="fa fa-heart"></i>
+                                    </button>
+                                </form>
+                            @else
+                                <a href="{{ route("login") }}"
+                                    class="btn btn-outline-danger rounded-circle"
+                                    data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="Login to Wishlist">
+                                    <i class="fa fa-heart"></i>
                                 </a>
+                            @endauth
+                                <form action="{{ route('cart.add') }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                    <button type="submit"
+                                            class="btn border border-secondary rounded-circle text-primary"
+                                            data-bs-toggle="tooltip" data-bs-placement="top" title="Add to Cart">
+                                        <i class="fa fa-shopping-bag"></i>
+                                    </button>
+                                </form>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -215,7 +242,7 @@
                             <h1 style="font-size: 100px;">1</h1>
                             <div class="d-flex flex-column">
                                 <span class="h2 mb-0">50$</span>
-                                <span class="h4 text-muted mb-0">kg</span>
+                                {{-- <span class="h4 text-muted mb-0">kg</span> --}}
                             </div>
                         </div>
                     </div>
@@ -233,30 +260,51 @@
                 <h1 class="display-4">Bestselling Fresh Picks</h1>
                 <p>From farm to table, explore our most loved fruits, vegetables, and food essentials. Handpicked for freshness and quality, these top choices are customer favorites for a reason.</p>
             </div>
+
             <div class="row g-4">
                 @forelse($products as $product)
                     <div class="col-lg-6 col-xl-4">
                         <div class="p-4 rounded bg-light h-100">
-                            <div class="row align-items-center">
+                            <div class="row align-items-center g-3">
                                 <div class="col-6">
-                                    @php
-                                        $photo = explode(",", $product->photo);
-                                    @endphp
+                                    @php $photo = explode(",", $product->photo); @endphp
                                     <a href="{{ route('product-detail', $product->slug) }}">
-
-                                            <img src="{{ $photo[0] }}" class="img-fluid rounded-circle w-100" alt="{{ $product->name }}"
-                                                >
-
+                                        <img src="{{ $photo[0] }}" class="img-fluid rounded-circle w-100" alt="{{ $product->name }}">
                                     </a>
                                 </div>
+
                                 <div class="col-6">
-                                    <a href="{{ route('product-detail', $product->slug) }}" class="h5">
+                                    <a href="{{ route('product-detail', $product->slug) }}" class="h5 d-block mb-2">
                                         {{ $product->name }}
                                     </a>
                                     <h4 class="mb-3">{{ $currencyService->convert($product->price, $currency) }}</h4>
-                                    <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary">
-                                        <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
-                                    </a>
+
+                                    <div class="d-flex gap-2">
+                                        @auth
+                                            <form action="{{ route('wishlist.store', $product->id) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                                <button type="submit" class="btn btn-outline-danger rounded-circle"
+                                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Add to Wishlist">
+                                                    <i class="fa fa-heart"></i>
+                                                </button>
+                                            </form>
+                                        @else
+                                            <a href="{{ route('login.form') }}" class="btn btn-outline-danger rounded-circle"
+                                               data-bs-toggle="tooltip" data-bs-placement="top" title="Login to Wishlist">
+                                                <i class="fa fa-heart"></i>
+                                            </a>
+                                        @endauth
+
+                                        <form action="{{ route('cart.add') }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                            <button type="submit" class="btn border border-secondary rounded-circle text-primary"
+                                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Add to Cart">
+                                                <i class="fa fa-shopping-bag"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -267,9 +315,9 @@
                     </div>
                 @endforelse
             </div>
-
         </div>
     </div>
+
     <!-- Bestsaler Product End -->
 
 

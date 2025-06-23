@@ -1,4 +1,8 @@
 @extends('backend.layouts.master')
+@inject('currencyService', 'App\Services\CurrencyService')
+@php
+    $currency = session('currency', 'NGN');
+@endphp
 
 @section('main-content')
  <!-- DataTales Example -->
@@ -23,6 +27,7 @@
               <th>Description</th>
               <th>Category</th>
               <th>Price</th>
+              <th>Weight (kg)</th>
               <th>Discount</th>
               <th>Stock</th>
               <th>Photo</th>
@@ -41,7 +46,8 @@
                     <td>{{ strip_tags($product->description) }}
                     </td>
                     <td>{{$product->category->title}}</td>
-                    <td>NGN {{$product->price}} </td>
+                    <td>{{ $currencyService->convert($product->price, $currency) }} </td>
+                    <td>{{$product->weight}} kg</td>
                     <td>  {{$product->discount}}% OFF</td>
                     <td>
                       @if($product->stock>0)

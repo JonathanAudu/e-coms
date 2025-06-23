@@ -74,10 +74,12 @@
 
                 <div class="d-flex align-items-center m-3 me-0">
                     <!-- Wishlist -->
-                    <a href="#" class="position-relative me-4">
-                        <i class="far fa-heart fa-lg"></i>
+                    <a href="{{ route('wishlist.index') }}" class="position-relative me-4" data-bs-toggle="tooltip" title="Wishlist">
+                        <i class="far fa-heart fa-lg text-dark"></i>
                         <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark"
-                              style="top: -5px; left: 12px; height: 18px; min-width: 18px; font-size: 12px;">3</span>
+                              style="top: -5px; left: 12px; height: 18px; min-width: 18px; font-size: 12px;">
+                            {{ auth()->check() ? auth()->user()->wishlists()->count() : 0 }}
+                        </span>
                     </a>
 
                     <!-- Cart -->
@@ -94,7 +96,7 @@
                     }
                 @endphp
 
-                <a href="{{ route('cart.index') }}" class="position-relative me-4">
+                <a href="{{ route('cart.index') }}" class="position-relative me-4" data-bs-toggle="tooltip" title="Cart">
                     <i class="fa fa-shopping-bag fa-lg"></i>
                     @if($cartCount > 0)
                         <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark"
@@ -160,7 +162,7 @@
          if (alert) {
              alert.classList.add('fade');
              alert.style.opacity = '0';
-             setTimeout(() => alert.remove(), 500); 
+             setTimeout(() => alert.remove(), 500);
          }
      }, 3000);
  </script>
