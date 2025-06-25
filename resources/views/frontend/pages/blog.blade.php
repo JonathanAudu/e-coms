@@ -36,8 +36,8 @@
                                         <h5 class="fw-bold mb-2">{{ $post->title }}</h5>
                                     </a>
                                     <div class="small text-muted mb-2">
-                                        <i class="fa fa-calendar"></i> {{ $post->created_at->format("M d, Y") }} &nbsp;
-                                        <i class="fa fa-user"></i> {{ $post->author_info->name ?? "Anonymous" }}
+                                        <i class="fa fa-calendar text-primary"></i> {{ $post->created_at->format("M d, Y") }} &nbsp;
+                                        <i class="fa fa-user text-primary"></i> {{ $post->author_info->name ?? "Anonymous" }}
                                     </div>
                                     <p class="mb-2">{{ Str::limit(strip_tags($post->summary), 70) }}</p>
                                     <a href="{{ route("blog.detail", $post->slug) }}"
@@ -50,7 +50,7 @@
                                             $tags = explode(",", $post->tags);
                                         @endphp
                                         <div class="mt-2">
-                                            <i class="fa fa-tags text-muted"></i>
+                                            <i class="fa fa-tags text-primary"></i>Tags:
                                             @foreach ($tags as $tag)
                                                 <a href="{{ route("blog.tag", trim($tag)) }}"
                                                     class="badge bg-light text-dark me-1">
@@ -101,30 +101,30 @@
                     </ul>
                 </div>
 
-                <!-- Post Categories -->
-                <div class="mb-5 ms-4">
-                    <h4 class="mb-3">Blog Categories</h4>
-                    <ul class="list-group list-group-flush">
-                        @if (!empty($_GET["category"]))
-                            @php
-                                $filter_cats = explode(",", $_GET["category"]);
-                            @endphp
-                        @endif
-                        <form action="{{ route("blog.filter") }}" method="POST">
-                            @csrf
-                            @foreach (App\Helpers\Helpers::postCategoryList("posts") as $cat)
-                                <li>
-                                    <div class="d-flex justify-content-between fruite-name ">
-                                        <a href="{{ route("blog.category", $cat->slug) }}">
-                                            {{ $cat->title }}
-                                        </a>
-                                    </div>
-                                    <span class="badge bg-primary">{{ $cat->posts_count }}</span>
-                                </li>
-                            @endforeach
-                        </form>
-                    </ul>
-                </div>
+                    <!-- Post Categories -->
+                    <div class="mb-5 ms-4">
+                        <h4 class="mb-3">Blog Categories</h4>
+                        <ul class="list-group list-group-flush">
+                            @if (!empty($_GET["category"]))
+                                @php
+                                    $filter_cats = explode(",", $_GET["category"]);
+                                @endphp
+                            @endif
+                            <form action="{{ route("blog.filter") }}" method="POST">
+                                @csrf
+                                @foreach (App\Helpers\Helpers::postCategoryList("posts") as $cat)
+                                    <li>
+                                        <div class="d-flex justify-content-between fruite-name ">
+                                            <a href="{{ route("blog.category", $cat->slug) }}">
+                                                {{ $cat->title }}
+                                            </a>
+                                        </div>
+                                        <span class="badge bg-primary">{{ $cat->posts_count }}</span>
+                                    </li>
+                                @endforeach
+                            </form>
+                        </ul>
+                    </div>
 
                 <!-- Tags -->
                 <div class="mb-5 ms-2">

@@ -46,10 +46,13 @@ class Post extends Model
     // public static function getBlogByCategory($id){
     //     return Post::where('post_cat_id',$id)->paginate(8);
     // }
-    public static function getBlogByTag($slug){
-        // dd($slug);
-        return Post::where('tags',$slug)->paginate(8);
-    }
+    public static function getBlogByTag($tag)
+{
+    return self::where('status', 'active')
+        ->where('tags', 'LIKE', '%' . $tag . '%')
+        ->orderBy('id', 'DESC')
+        ->paginate(4); 
+}
 
     public static function countActivePost(){
         $data=Post::where('status','active')->count();

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Post;
-use Notification;
-use App\User;
-use App\Notifications\StatusNotification;
+use App\Models\User;
 use App\Models\PostComment;
+use Illuminate\Http\Request;
+use App\Notifications\StatusNotification;
+use Illuminate\Support\Facades\Notification;
 class PostCommentController extends Controller
 {
     /**
@@ -39,30 +39,45 @@ class PostCommentController extends Controller
      */
     public function store(Request $request)
     {
-        // return $request->all();
-        $post_info=Post::getPostBySlug($request->slug);
-        // return $post_info;
-        $data=$request->all();
-        $data['user_id']=$request->user()->id;
-        // $data['post_id']=$post_info->id;
-        $data['status']='active';
-        // return $data;
-        $status=PostComment::create($data);
-        $user=User::where('role','admin')->get();
-        $details=[
-            'title'=>"New Comment created",
-            'actionURL'=>route('blog.detail',$post_info->slug),
-            'fas'=>'fas fa-comment'
+        $request->validate([
+            'comment' => 'required|string|max:2000',
+            'post_id' => 'required|exists:posts,id',
+        ]);
+
+        $post = Post::findOrFail($request->post_id);
+
+        $parentId = $request->input('parent_id');
+        $parentId = ($parentId === 'undefined' || $parentId === '' || !is_numeric($parentId)) ? null : (int)$parentId;
+
+
+        $data = [
+            'post_id'   => $post->id,
+            'user_id'   => $request->user()->id,
+            'comment'   => $request->comment,
+            'parent_id' => $request->input('parent_id') ?? null,
+            'status'    => 'active',
         ];
-        Notification::send($user, new StatusNotification($details));
-        if($status){
-            request()->session()->flash('success','Thank you for your comment');
+
+        $status = PostComment::create($data);
+
+
+        // Notify admin
+        $admins = User::where('role', 'admin')->get();
+        Notification::send($admins, new StatusNotification([
+            'title' => "New Comment on Post",
+            'actionURL' => route('blog.detail', $post->slug),
+            'fas' => 'fas fa-comment'
+        ]));
+
+        if ($status) {
+            session()->flash('success', 'Thank you for your comment');
+        } else {
+            session()->flash('error', 'Something went wrong! Please try again.');
         }
-        else{
-            request()->session()->flash('error','Something went wrong! Please try again!!');
-        }
+
         return redirect()->back();
     }
+
 
     /**
      * Display the specified resource.

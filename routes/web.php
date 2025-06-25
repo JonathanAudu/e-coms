@@ -105,6 +105,12 @@ Route::get('blog-cat/{slug}', [BlogController::class, 'blogByCategory'])->name('
 Route::get('blog-tag/{slug}', [BlogController::class, 'blogByTag'])->name('blog.tag');
 
 
+// Comment
+Route::post('/post-comment/{slug}', [App\Http\Controllers\PostCommentController::class, 'store'])->name('post-comment.store');
+Route::resource('/comment', 'PostCommentController');
+
+
+
 //  Admin Dashboard
 Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'admin']], function () {
     Route::get('/', [AdminController::class, 'index'])->name('admin');
