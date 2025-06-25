@@ -67,7 +67,7 @@
                         </div>
                     </div>
 
-                    <a href="" class="nav-item nav-link {{ request()->routeIs('blog') ? 'active' : '' }}">Blog</a>
+                    <a href="{{ route('blog') }}" class="nav-item nav-link {{ request()->routeIs('blog') ? 'active' : '' }}">Blog</a>
 
                     <a href="{{ route('contact') }}" class="nav-item nav-link {{ request()->routeIs('contact') ? 'active' : '' }}">Contact Us</a>
                 </div>

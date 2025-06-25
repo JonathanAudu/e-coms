@@ -15,6 +15,7 @@ use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\BlogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,7 +38,7 @@ Route::get('cache-clear', function () {
 
 
 // STORAGE LINKED ROUTE
-Route::get('storage-link',[AdminController::class,'storageLink'])->name('storage.link');
+Route::get('storage-link', [AdminController::class, 'storageLink'])->name('storage.link');
 
 
 Auth::routes(['register' => false]);
@@ -59,17 +60,17 @@ Route::get('/products', [FrontendController::class, 'allProducts'])->name('produ
 Route::get('product-detail/{slug}', [FrontendController::class, 'productDetail'])->name('product-detail');
 
 
- // Reset password
- Route::get('password/reset', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
- Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
- // Password Reset Routes
- Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
- Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
- Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
- Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+// Reset password
+Route::get('password/reset', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+// Password Reset Routes
+Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 
- Route::prefix('cart')->name('cart.')->group(function () {
+Route::prefix('cart')->name('cart.')->group(function () {
     Route::get('/', [CartController::class, 'index'])->name('index');
     Route::post('/add', [CartController::class, 'addToCart'])->name('add');
     Route::post('/update', [CartController::class, 'cartUpdate'])->name('update');
@@ -95,8 +96,17 @@ Route::get('/payment/paystack/{order}', [PaymentController::class, 'redirectToPa
 Route::get('/payment/paystack/callback', [PaymentController::class, 'handleGatewayCallback'])->name('paystack.callback');
 
 
+// Blog
+Route::get('/blog', [BlogController::class, 'blog'])->name('blog');
+Route::get('/blog-detail/{slug}', [BlogController::class, 'blogDetail'])->name('blog.detail');
+Route::get('/blog/search', [BlogController::class, 'blogSearch'])->name('blog.search');
+Route::post('/blog/filter', [BlogController::class, 'blogFilter'])->name('blog.filter');
+Route::get('blog-cat/{slug}', [BlogController::class, 'blogByCategory'])->name('blog.category');
+Route::get('blog-tag/{slug}', [BlogController::class, 'blogByTag'])->name('blog.tag');
+
+
 //  Admin Dashboard
- Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'admin']], function () {
+Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'admin']], function () {
     Route::get('/', [AdminController::class, 'index'])->name('admin');
     Route::get('/file-manager', function () {
         return view('backend.layouts.file-manager');
@@ -173,4 +183,3 @@ Route::group(['prefix' => '/user', 'middleware' => ['user']], function () {
 // Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']], function () {
 //     Lfm::routes();
 // });
-
