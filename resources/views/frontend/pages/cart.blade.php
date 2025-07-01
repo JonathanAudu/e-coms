@@ -36,19 +36,25 @@
                   </tr>
                 </thead>
                 <tbody>
-                    @php $subtotal = 0; @endphp
+                    @php
+                    $subtotal = 0;
+                    $totalShipping = 0;
+                @endphp
 
-                    @forelse($cartItems as $key => $item)
-                        @php
-                            $product = auth()->check() ? $item->product : null;
-                            $name = auth()->check() ? $product->name : $item['name'];
-                            $photo = auth()->check() ? explode(',', $product->photo)[0] : $item['photo'];
-                            $price = auth()->check() ? $product->price : $item['price'];
-                            $quantity = auth()->check() ? $item->quantity : $item['quantity'];
-                            $productId = auth()->check() ? $product->id : $key;
-                            $itemTotal = $price * $quantity;
-                            $subtotal += $itemTotal;
-                        @endphp
+                @forelse($cartItems as $key => $item)
+                    @php
+                        $product = auth()->check() ? $item->product : null;
+                        $name = auth()->check() ? $product->name : $item['name'];
+                        $photo = auth()->check() ? explode(',', $product->photo)[0] : $item['photo'];
+                        $price = auth()->check() ? $product->price : $item['price'];
+                        $quantity = auth()->check() ? $item->quantity : $item['quantity'];
+                        $productId = auth()->check() ? $product->id : $key;
+                        $itemTotal = $price * $quantity;
+                        $shippingFee = App\Helpers\Helpers::calculateShippingFee($product->name, $quantity);
+
+                        $subtotal += $itemTotal;
+                        $totalShipping += $shippingFee;
+                    @endphp
 
                         <tr>
                             <td><img src="{{ asset($photo) }}" class="img-fluid rounded-circle" style="width: 80px; height: 80px;"></td>
@@ -112,9 +118,8 @@
                             <h5 class="mb-0 me-4">Shipping Fee</h5>
                             <div class="">
 
-                                @php $shipping = 2000; @endphp
+                                <p class="mb-0">Calculated: {{ $currencyService->convert($totalShipping, $currency) }} </p>
 
-                                <p class="mb-0">Flat rate: {{ $currencyService->convert($shipping, $currency) }} </p>
 
                             </div>
                         </div>
@@ -122,7 +127,8 @@
                     </div>
                     <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
                         <h5 class="mb-0 ps-4 me-4">Total</h5>
-                        <p class="mb-0 pe-4">{{ $currencyService->convert($subtotal + $shipping, $currency) }}</p>
+                        <p class="mb-0 pe-4">{{ $currencyService->convert($subtotal + $totalShipping, $currency) }}</p>
+
                     </div>
                     <form action="{{ route('checkout.form') }}" method="GET" class="mb-4 ms-4">
                         <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase" type="submit">

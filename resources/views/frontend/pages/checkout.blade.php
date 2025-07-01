@@ -83,49 +83,67 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @php $grandTotal = 0; @endphp
-                                @foreach($cart as $item)
-                                    @php
-                                        $product = auth()->check() ? $item->product : \App\Models\Product::find($item['product_id']);
-                                        $qty = auth()->check() ? $item->quantity : $item['quantity'];
-                                        $price = $product->price;
-                                        $total = $price * $qty;
-                                        $grandTotal += $total;
-                                    @endphp
-                                    <tr>
-                                        <td><img src="{{ $product->photo ?? 'img/default.jpg' }}" style="width: 70px; height: 70px;" alt=""></td>
-                                        <td>{{ $product->name }}</td>
-                                        <td>{{ $currencyService->convert($price, $currency) }}</td>
-                                        <td>{{ $qty }}</td>
-                                        <td>{{ $currencyService->convert($total, $currency) }}</td>
-                                    </tr>
-                                @endforeach
+                                @php
+                                $grandTotal = 0;
+                                $totalShipping = 0;
+                            @endphp
+
+                            @foreach($cart as $item)
+                                @php
+                                    $product = auth()->check() ? $item->product : \App\Models\Product::find($item['product_id']);
+                                    $qty = auth()->check() ? $item->quantity : $item['quantity'];
+                                    $price = $product->price;
+                                    $total = $price * $qty;
+
+                                    // Calculate shipping fee per item
+                                    $shippingFee = App\Helpers\Helpers::calculateShippingFee($product->name, $qty);
+
+                                    $grandTotal += $total;
+                                    $totalShipping += $shippingFee;
+                                @endphp
                                 <tr>
-                                    <td colspan="4" class="text-end">Subtotal</td>
-                                    <td><strong>{{ $currencyService->convert($grandTotal, $currency) }}</strong></td>
+                                    <td><img src="{{ $product->photo ?? 'img/default.jpg' }}" style="width: 70px; height: 70px;" alt=""></td>
+                                    <td>{{ $product->name }}</td>
+                                    <td>{{ $currencyService->convert($price, $currency) }}</td>
+                                    <td>{{ $qty }}</td>
+                                    <td>{{ $currencyService->convert($total, $currency) }}</td>
                                 </tr>
+                            @endforeach
+                            <tr>
+                                <td colspan="4" class="text-end">Subtotal</td>
+                                <td><strong>{{ $currencyService->convert($grandTotal, $currency) }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end">Shipping</td>
+                                <td><strong>{{ $currencyService->convert($totalShipping, $currency) }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end">Total</td>
+                                <td><strong>{{ $currencyService->convert($grandTotal + $totalShipping, $currency) }}</strong></td>
+                            </tr>
+
                             </tbody>
                         </table>
                     </div>
 
-                    <div class="form-check my-3">
+                    {{-- <div class="form-check my-3">
                         <input type="radio" class="form-check-input" name="payment_method" id="cod" value="cash_on_delivery" checked>
                         <label class="form-check-label" for="cod">
                            Cash On Delivery  <i class="fas fa-truck me-1 text-secondary"></i>
                         </label>
-                    </div>
+                    </div> --}}
 
                     <div class="form-check my-3">
                         <input type="radio" class="form-check-input" name="payment_method" id="paystack" value="paystack">
                         <label class="form-check-label" for="paystack">
-                            Paystack <i class="fas fa-credit-card me-1 text-primary"></i>
+                             <i class="fas fa-credit-card me-1 text-primary"></i>Paystack
                         </label>
                     </div>
 
                     <div class="form-check my-3">
                         <input type="radio" class="form-check-input" name="payment_method" id="stripe" value="stripe">
                         <label class="form-check-label" for="stripe">
-                            Stripe  <i class="fab fa-cc-stripe me-1 text-info"></i>
+                            <i class="fab fa-cc-stripe me-1 text-info"></i>Stripe (Outside Nigeria)
                         </label>
                     </div>
 

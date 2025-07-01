@@ -12,7 +12,7 @@
             <div class="row g-5 align-items-center">
                 <div class="col-md-12 col-lg-7">
                     <h3 class="mb-3 text-secondary">100% Foods & Vegetable</h3>
-                    <h1 class="mb-5 display-2 text-primary">Fresh Veggies & Fruits Foods</h1>
+                    <h1 class="mb-5 display-2 text-primary">Organic Seafoods and Fresh Palm Oil</h1>
                 </div>
                 <div class="col-md-12 col-lg-5">
                     <div id="carouselId" class="carousel slide position-relative" data-bs-ride="carousel">
@@ -193,7 +193,7 @@
                                     </button>
                                 </form>
                             @else
-                                <a href="{{ route("login") }}"
+                                <a href="{{ route("login.form") }}"
                                     class="btn btn-outline-danger rounded-circle"
                                     data-bs-toggle="tooltip" data-bs-placement="top"
                                     title="Login to Wishlist">
@@ -290,10 +290,10 @@
                                                 </button>
                                             </form>
                                         @else
-                                            <a href="{{ route('login.form') }}" class="btn btn-outline-danger rounded-circle"
-                                               data-bs-toggle="tooltip" data-bs-placement="top" title="Login to Wishlist">
-                                                <i class="fa fa-heart"></i>
-                                            </a>
+                                                <a href="{{ route('login.form') }}" class="btn btn-outline-danger rounded-circle"
+                                                data-bs-toggle="tooltip" data-bs-placement="top" title="Login to Wishlist">
+                                                    <i class="fa fa-heart"></i>
+                                                </a>
                                         @endauth
 
                                         <form action="{{ route('cart.add') }}" method="POST" class="d-inline">

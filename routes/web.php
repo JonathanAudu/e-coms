@@ -84,6 +84,12 @@ Route::controller(OrderController::class)->group(function () {
     Route::get('/thank-you', 'thankYou')->name('checkout.thankyou');
 });
 
+Route::get('order/pdf/{id}', [OrderController::class, 'pdf'])->name('order.pdf');
+Route::get('/income', [OrderController::class, 'incomeChart'])->name('product.order.income');
+
+
+
+
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
@@ -92,7 +98,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
-Route::get('/payment/paystack/{order}', [PaymentController::class, 'redirectToPaystack'])->name('paystack.checkout');
+Route::get('/payment/paystack/{order}', [PaymentController::class, 'redirectToPaystack'])->name('paystack.redirect');
 Route::get('/payment/paystack/callback', [PaymentController::class, 'handleGatewayCallback'])->name('paystack.callback');
 
 

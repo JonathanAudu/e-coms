@@ -22,6 +22,18 @@ class Helpers
     }
 
 
+    public static function calculateShippingFee(string $productName, int $quantity): int
+    {
+        $productName = strtolower(trim($productName));
+
+        if ($productName === 'palm oil') {
+            return 7000 * $quantity;
+        }
+
+        // For other products: flat 4000 per 1–10 units, else scales
+        return 4000 * ceil($quantity / 10);
+    }
+
 
 
     public static function postTagList($option = 'all')

@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Product;
+use App\Helpers\Helpers;
 use App\Models\Category;
+use Barryvdh\DomPDF\PDF;
 use App\Models\OrderItem;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -13,6 +15,88 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
+
+    public function index()
+    {
+        $orders = Order::with('orderItems')->latest()->paginate(10);
+        return view('backend.order.index')->with('orders',$orders);
+    }
+
+
+    public function show($id)
+    {
+        $order=Order::find($id);
+        return view('backend.order.show')->with('order',$order);
+    }
+
+    public function edit($id)
+    {
+        $order=Order::find($id);
+        return view('backend.order.edit')->with('order',$order);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $order=Order::find($id);
+        $this->validate($request,[
+            'status'=>'required|in:new,process,delivered,cancel'
+        ]);
+        $data=$request->all();
+        // return $request->status;
+        if($request->status=='delivered'){
+            foreach($order->cart as $cart){
+                $product=$cart->product;
+                // return $product;
+                $product->stock -=$cart->quantity;
+                $product->save();
+            }
+        }
+        $status=$order->fill($data)->save();
+        if($status){
+            request()->session()->flash('success','Successfully updated order');
+        }
+        else{
+            request()->session()->flash('error','Error while updating order');
+        }
+        return redirect()->route('order.index');
+    }
+
+     // PDF generate
+     public function pdf(Request $request){
+        $order=Order::getAllOrder($request->id);
+        // return $order;
+        $file_name=$order->order_number.'-'.$order->first_name.'.pdf';
+        // return $file_name;
+        $pdf=PDF::loadview('backend.order.pdf',compact('order'));
+        return $pdf->download($file_name);
+    }
+    // Income chart
+    public function incomeChart(Request $request){
+        $year=\Carbon\Carbon::now()->year;
+        // dd($year);
+        $items=Order::with(['cart_info'])->whereYear('created_at',$year)->where('status','delivered')->get()
+            ->groupBy(function($d){
+                return \Carbon\Carbon::parse($d->created_at)->format('m');
+            });
+            // dd($items);
+        $result=[];
+        foreach($items as $month=>$item_collections){
+            foreach($item_collections as $item){
+                $amount=$item->cart_info->sum('amount');
+                // dd($amount);
+                $m=intval($month);
+                // return $m;
+                isset($result[$m]) ? $result[$m] += $amount :$result[$m]=$amount;
+            }
+        }
+        $data=[];
+        for($i=1; $i <=12; $i++){
+            $monthName=date('F', mktime(0,0,0,$i,1));
+            $data[$monthName] = (!empty($result[$i]))? number_format((float)($result[$i]), 2, '.', '') : 0.0;
+        }
+        return $data;
+    }
+
     public function checkoutForm()
     {
         if (!auth()->check()) {
@@ -58,12 +142,18 @@ class OrderController extends Controller
         DB::beginTransaction();
         try {
             $total = 0;
+            $shipping = 0;
 
             foreach ($cart as $key => $item) {
                 $price = auth()->check() ? $item->product->price : $item['price'];
                 $qty = auth()->check() ? $item->quantity : $item['quantity'];
+                $name = auth()->check() ? $item->product->name : $item['name'];
                 $total += $price * $qty;
+
+                $shipping += Helpers::calculateShippingFee($name, $qty);
             }
+
+
 
             $order = Order::create([
                 'order_number'     => $this->generateOrderNumber(),
@@ -78,21 +168,23 @@ class OrderController extends Controller
                 'country'          => $request->country,
                 'state'            => $request->state,
                 'notes'            => $request->notes,
-                'total'            => $total,
-                'payment_method'   => $request->payment_method,
+               'total'            => $total + $shipping,
+                'shipping_fee'     => $shipping,
+                'payment_method' => $request->payment_method,
             ]);
 
             foreach ($cart as $key => $item) {
                 $product = auth()->check() ? $item->product : Product::find($key);
 
-                OrderItem::create([
+            OrderItem::create([
                     'order_id'   => $order->id,
                     'product_id' => $product->id,
                     'name'       => $product->name,
                     'price'      => $product->price,
-                    'quantity'   => auth()->check() ? $item->quantity : $item['quantity'],
+                    'quantity'   =>  $qty,
                 ]);
             }
+
 
             // Clear cart
             if (auth()->check()) {
@@ -107,7 +199,7 @@ class OrderController extends Controller
             }
 
             if ($request->payment_method === 'paystack') {
-                return redirect()->route('pay');
+                return redirect()->route('paystack.redirect', $order->id);
             }
 
             if ($request->payment_method === 'stripe') {
@@ -134,5 +226,24 @@ class OrderController extends Controller
     private function generateOrderNumber()
     {
         return 'ORD-' . strtoupper(Str::random(8));
+    }
+
+    public function destroy($id)
+    {
+        $order=Order::find($id);
+        if($order){
+            $status=$order->delete();
+            if($status){
+                request()->session()->flash('success','Order Successfully deleted');
+            }
+            else{
+                request()->session()->flash('error','Order can not deleted');
+            }
+            return redirect()->route('order.index');
+        }
+        else{
+            request()->session()->flash('error','Order can not found');
+            return redirect()->back();
+        }
     }
 }

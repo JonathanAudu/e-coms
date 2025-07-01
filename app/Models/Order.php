@@ -18,13 +18,15 @@ class Order extends Model
         'country',
         'state',
         'notes',
+        'quantity',
         'total',
+        'shipping_fee',
         'payment_method',
         'payment_status',
         'status',
     ];
 
-    public function items()
+    public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
     }
