@@ -20,7 +20,7 @@
                          <a href="{{ route("admin") }}" class="text-white d-block d-md-inline"><small class="mx-2"><i
                                      class="fas fa-user me-1 text-secondary"></i> Dashboard</small>/</a>
                      @else
-                         <a href="" class="text-white d-block d-md-inline"><small class="mx-2"><i
+                         <a href="{{ route("user") }}" class="text-white d-block d-md-inline"><small class="mx-2"><i
                                      class="fas fa-user me-1 text-secondary"></i> Dashboard</small>/</a>
                      @endif
                      <a href="{{ route("user.logout") }}" class="text-white d-block d-md-inline"><small class="mx-2"><i

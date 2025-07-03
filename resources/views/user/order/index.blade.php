@@ -1,4 +1,8 @@
 @extends('user.layouts.master')
+@inject('currencyService', 'App\Services\CurrencyService')
+@php
+    $currency = session('currency', 'NGN');
+@endphp
 
 @section('main-content')
  <!-- DataTales Example -->
@@ -17,40 +21,44 @@
         <table class="table table-bordered" id="order-dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
-              <th>S.N.</th>
-              <th>Order No.</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Quantity</th>
-              <th>Charge</th>
-              <th>Total Amount</th>
-              <th>Status</th>
-              <th>Action</th>
+                <th>S.N.</th>
+                <th>Order No.</th>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Shipping Fee</th>
+                <th>Amount</th>
+                <th>Total Amount</th>
+                <th>Status</th>
+                <th>Action</th>
             </tr>
           </thead>
-          <tfoot>
-            <tr>
-              <th>S.N.</th>
-              <th>Order No.</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Quantity</th>
-              <th>Charge</th>
-              <th>Total Amount</th>
-              <th>Status</th>
-              <th>Action</th>
-              </tr>
-          </tfoot>
           <tbody>
-            @foreach($orders as $order)
+            @if(count($orders)>0)
+              @foreach($orders as $order)
                 <tr>
-                    <td>{{$order->id}}</td>
+                    <td>{{ ($orders->currentPage() - 1) * $orders->perPage() + $loop->iteration }}</td>
                     <td>{{$order->order_number}}</td>
                     <td>{{$order->first_name}} {{$order->last_name}}</td>
-                    <td>{{$order->email}}</td>
-                    <td>{{$order->quantity}}</td>
-                    <td>${{$order->shipping->price}}</td>
-                    <td>${{number_format($order->total_amount,2)}}</td>
+                    <td>
+                        @foreach($order->orderItems as $item)
+                            {{ $item->name }} : {{ $item->quantity }}<br>
+                        @endforeach
+                    </td>
+                    <td>{{ $currencyService->convert($order->shipping_fee, $currency) }}</td>
+                    <td>
+                        @php
+                            $items = $order->orderItems;
+                        @endphp
+
+                        @if($items->count() === 1)
+                        {{ $currencyService->convert($items->first()->price, $currency) }}
+                        @else
+                            {!! $items->map(fn($item) => $currencyService->convert($item->price, $currency) . ' x ' . $item->quantity)->implode('<br>') !!}
+                        @endif
+                    </td>
+
+
+                    <td>{{ $currencyService->convert($order->total, $currency) }}</td>
                     <td>
                         @if($order->status=='new')
                           <span class="badge badge-primary">{{$order->status}}</span>
@@ -71,7 +79,10 @@
                         </form>
                     </td>
                 </tr>
-            @endforeach
+              @endforeach
+              @else
+                <td colspan="8" class="text-center"><h4 class="my-4">You have no order yet!! Please order some products</h4></td>
+              @endif
           </tbody>
         </table>
         <span style="float:right">{{$orders->links()}}</span>

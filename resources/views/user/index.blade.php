@@ -1,4 +1,8 @@
 @extends('user.layouts.master')
+@inject('currencyService', 'App\Services\CurrencyService')
+@php
+    $currency = session('currency', 'NGN');
+@endphp
 
 @section('main-content')
 <div class="container-fluid">
@@ -8,56 +12,16 @@
       <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
     </div>
 
-    <!-- Content Row -->
-    {{-- <div class="row">
+     <div class="row">
 
-      <!-- Category -->
+      <!-- Order -->
       <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-primary shadow h-100 py-2">
           <div class="card-body">
             <div class="row no-gutters align-items-center">
               <div class="col mr-2">
-                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Category</div>
-                <div class="h5 mb-0 font-weight-bold text-gray-800">{{\App\Models\Category::countActiveCategory()}}</div>
-              </div>
-              <div class="col-auto">
-                <i class="fas fa-sitemap fa-2x text-gray-300"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Products -->
-      <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100 py-2">
-          <div class="card-body">
-            <div class="row no-gutters align-items-center">
-              <div class="col mr-2">
-                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Products</div>
-                <div class="h5 mb-0 font-weight-bold text-gray-800">{{\App\Models\Product::countActiveProduct()}}</div>
-              </div>
-              <div class="col-auto">
-                <i class="fas fa-cubes fa-2x text-gray-300"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Order -->
-      <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-info shadow h-100 py-2">
-          <div class="card-body">
-            <div class="row no-gutters align-items-center">
-              <div class="col mr-2">
-                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Order</div>
-                <div class="row no-gutters align-items-center">
-                  <div class="col-auto">
-                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">{{\App\Models\Order::countActiveOrder()}}</div>
-                  </div>
-                  
-                </div>
+                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Your Orders</div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $orders->total() }}</div>
               </div>
               <div class="col-auto">
                 <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
@@ -67,67 +31,90 @@
         </div>
       </div>
 
-      <!--Posts-->
+      <!-- Review -->
       <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-warning shadow h-100 py-2">
+        <div class="card border-left-success shadow h-100 py-2">
           <div class="card-body">
             <div class="row no-gutters align-items-center">
               <div class="col mr-2">
-                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Post</div>
-                <div class="h5 mb-0 font-weight-bold text-gray-800">{{\App\Models\Post::countActivePost()}}</div>
+                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Your Reviews</div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800"></div>
               </div>
               <div class="col-auto">
-                <i class="fas fa-folder fa-2x text-gray-300"></i>
+                <i class="fas fa-chalkboard-teacher fa-2x text-gray-300"></i>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div> --}}
 
-    <!-- Content Row -->
+      <!-- Comments -->
+      <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+          <div class="card-body">
+            <div class="row no-gutters align-items-center">
+              <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Your Comments</div>
+                <div class="row no-gutters align-items-center">
+                  <div class="col-auto">
+                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800"></div>
+                  </div>
+
+                </div>
+              </div>
+              <div class="col-auto">
+                <i class="fas fa-comments fa-2x text-gray-300"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div class="row">
-      @php
-          $orders=DB::table('orders')->where('user_id',auth()->user()->id)->paginate(10);
-      @endphp
       <!-- Order -->
       <div class="col-xl-12 col-lg-12">
         <table class="table table-bordered" id="order-dataTable" width="100%" cellspacing="0">
           <thead>
             <tr>
-              <th>S.N.</th>
-              <th>Order No.</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Quantity</th>
-              <th>Total Amount</th>
-              <th>Status</th>
-              <th>Action</th>
+                <th>S.N.</th>
+                <th>Order No.</th>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Shipping Fee</th>
+                <th>Amount</th>
+                <th>Total Amount</th>
+                <th>Status</th>
+                <th>Action</th>
             </tr>
           </thead>
-          <tfoot>
-            <tr>
-              <th>S.N.</th>
-              <th>Order No.</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Quantity</th>
-              <th>Total Amount</th>
-              <th>Status</th>
-              <th>Action</th>
-              </tr>
-          </tfoot>
           <tbody>
             @if(count($orders)>0)
-              @foreach($orders as $order)   
+              @foreach($orders as $order)
                 <tr>
-                    <td>{{$order->id}}</td>
+                    <td>{{ ($orders->currentPage() - 1) * $orders->perPage() + $loop->iteration }}</td>
                     <td>{{$order->order_number}}</td>
                     <td>{{$order->first_name}} {{$order->last_name}}</td>
-                    <td>{{$order->email}}</td>
-                    <td>{{$order->quantity}}</td>
-                    <td>${{number_format($order->total_amount,2)}}</td>
+                    <td>
+                        @foreach($order->orderItems as $item)
+                            {{ $item->name }} : {{ $item->quantity }}<br>
+                        @endforeach
+                    </td>
+                    <td>{{ $currencyService->convert($order->shipping_fee, $currency) }}</td>
+                    <td>
+                        @php
+                            $items = $order->orderItems;
+                        @endphp
+
+                        @if($items->count() === 1)
+                        {{ $currencyService->convert($items->first()->price, $currency) }}
+                        @else
+                            {!! $items->map(fn($item) => $currencyService->convert($item->price, $currency) . ' x ' . $item->quantity)->implode('<br>') !!}
+                        @endif
+                    </td>
+
+
+                    <td>{{ $currencyService->convert($order->total, $currency) }}</td>
                     <td>
                         @if($order->status=='new')
                           <span class="badge badge-primary">{{$order->status}}</span>
@@ -142,12 +129,12 @@
                     <td>
                         <a href="{{route('user.order.show',$order->id)}}" class="btn btn-warning btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="view" data-placement="bottom"><i class="fas fa-eye"></i></a>
                         <form method="POST" action="{{route('user.order.delete',[$order->id])}}">
-                          @csrf 
+                          @csrf
                           @method('delete')
                               <button class="btn btn-danger btn-sm dltBtn" data-id={{$order->id}} style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" data-placement="bottom" title="Delete"><i class="fas fa-trash-alt"></i></button>
                         </form>
                     </td>
-                </tr>  
+                </tr>
               @endforeach
               @else
                 <td colspan="8" class="text-center"><h4 class="my-4">You have no order yet!! Please order some products</h4></td>

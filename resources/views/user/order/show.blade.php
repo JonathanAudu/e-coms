@@ -1,4 +1,8 @@
 @extends('user.layouts.master')
+@inject("currencyService", "App\Services\CurrencyService")
+@php
+    $currency = session("currency", "NGN");
+@endphp
 
 @section('title','Order Detail')
 
@@ -11,47 +15,72 @@
     <table class="table table-striped table-hover">
       <thead>
         <tr>
-            <th>S.N.</th>
-            <th>Order No.</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Quantity</th>
-            <th>Charge</th>
-            <th>Total Amount</th>
-            <th>Status</th>
-            <th>Action</th>
+            <tr>
+                <th>Order No.</th>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Shipping Fee</th>
+                <th>Amount</th>
+                <th>Total Amount</th>
+                <th>Status</th>
+                {{-- <th>Action</th> --}}
+            </tr>
         </tr>
       </thead>
       <tbody>
         <tr>
-            <td>{{$order->id}}</td>
-            <td>{{$order->order_number}}</td>
-            <td>{{$order->first_name}} {{$order->last_name}}</td>
-            <td>{{$order->email}}</td>
-            <td>{{$order->quantity}}</td>
-            <td>${{$order->shipping->price}}</td>
-            <td>${{number_format($order->total_amount,2)}}</td>
+            <td>{{ $order->order_number }}</td>
             <td>
-                @if($order->status=='new')
-                  <span class="badge badge-primary">{{$order->status}}</span>
-                @elseif($order->status=='process')
-                  <span class="badge badge-warning">{{$order->status}}</span>
-                @elseif($order->status=='delivered')
-                  <span class="badge badge-success">{{$order->status}}</span>
+                @foreach($order->orderItems as $item)
+                    {{ $item->name }} <br>
+                @endforeach
+            </td>
+            <td>
+                @foreach ($order->orderItems as $item)
+                    {{ $item->quantity }}<br>
+                @endforeach
+            </td>
+            <td>{{ $currencyService->convert($order->shipping_fee, $currency) }}</td>
+            <td>
+                @php
+                    $items = $order->orderItems;
+                @endphp
+
+                @if ($items->count() === 1)
+                    {{ $currencyService->convert($items->first()->price, $currency) }}
                 @else
-                  <span class="badge badge-danger">{{$order->status}}</span>
+                    {!! $items->map(fn($item) => $currencyService->convert($item->price, $currency) . " x " . $item->quantity)->implode("<br>") !!}
                 @endif
             </td>
+            <td>{{ $currencyService->convert($order->total, $currency) }}</td>
             <td>
-                <form method="POST" action="{{route('order.destroy',[$order->id])}}">
-                  @csrf
-                  @method('delete')
-                      <button class="btn btn-danger btn-sm dltBtn" data-id={{$order->id}} style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" data-placement="bottom" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                </form>
+                @if ($order->status == "new")
+                    <span class="badge badge-primary">{{ $order->status }}</span>
+                @elseif($order->status == "process")
+                    <span class="badge badge-warning">{{ $order->status }}</span>
+                @elseif($order->status == "delivered")
+                    <span class="badge badge-success">{{ $order->status }}</span>
+                @else
+                    <span class="badge badge-danger">{{ $order->status }}</span>
+                @endif
             </td>
-
+            {{-- <td>
+                <a href="{{ route("order.edit", $order->id) }}" class="btn btn-primary btn-sm"
+                    data-toggle="tooltip" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <form method="POST" action="{{ route("order.destroy", $order->id) }}"
+                    style="display:inline;">
+                    @csrf
+                    @method("delete")
+                    <button class="btn btn-danger btn-sm dltBtn" data-id="{{ $order->id }}"
+                        data-toggle="tooltip" title="Delete">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </form>
+            </td> --}}
         </tr>
-      </tbody>
+    </tbody>
     </table>
 
     <section class="confirmation_part section_padding">
@@ -61,42 +90,69 @@
             <div class="order-info">
               <h4 class="text-center pb-4">ORDER INFORMATION</h4>
               <table class="table">
-                    <tr class="">
-                        <td>Order Number</td>
-                        <td> : {{$order->order_number}}</td>
-                    </tr>
+                <tr>
+                    <td>Order Number</td>
+                    <td>: {{ $order->order_number }}</td>
+                </tr>
+                <tr>
+                    <td>Order Date</td>
+                    <td>: {{ $order->created_at->format('D d M, Y \a\t g:i a') }}</td>
+                </tr>
+                <tr>
+                    <td>Quantity</td>
+                    <td>
+                        @foreach ($order->orderItems as $item)
+                           {{ $item->name }} : {{ $item->quantity }}<br>
+                        @endforeach
+                    </td>
+                </tr>
+                <tr>
+                    <td>Order Status</td>
+                    <td>: {{ ucfirst($order->status) }}</td>
+                </tr>
+                <tr>
+                    <td>Shipping Fee</td>
+                    <td>: {{ $currencyService->convert($order->shipping_fee, $currency) }}</td>
+                </tr>
+                <tr>
+                    <td>Amount</td>
+                    <td>:
+                        @php
+                            $productTotal = $order->orderItems->sum(function ($item) {
+                                return $item->price * $item->quantity;
+                            });
+                        @endphp
+                        {{ $currencyService->convert($productTotal, $currency) }}
+                    </td>
+                </tr>
+
+                @if (isset($order->coupon))
                     <tr>
-                        <td>Order Date</td>
-                        <td> : {{$order->created_at->format('D d M, Y')}} at {{$order->created_at->format('g : i a')}} </td>
+                        <td>Coupon</td>
+                        <td>: ${{ number_format($order->coupon, 2) }}</td>
                     </tr>
-                    <tr>
-                        <td>Quantity</td>
-                        <td> : {{$order->quantity}}</td>
-                    </tr>
-                    <tr>
-                        <td>Order Status</td>
-                        <td> : {{$order->status}}</td>
-                    </tr>
-                    <tr>
-                      @php
-                          $shipping_charge=DB::table('shippings')->where('id',$order->shipping_id)->pluck('price');
-                      @endphp
-                        <td>Shipping Charge</td>
-                        <td> :${{$order->shipping->price}}</td>
-                    </tr>
-                    <tr>
-                        <td>Total Amount</td>
-                        <td> : $ {{number_format($order->total_amount,2)}}</td>
-                    </tr>
-                    <tr>
-                      <td>Payment Method</td>
-                      <td> : @if($order->payment_method=='cod') Cash on Delivery @else paystack @endif</td>
-                    </tr>
-                    <tr>
-                        <td>Payment Status</td>
-                        <td> : {{$order->payment_status}}</td>
-                    </tr>
-              </table>
+                @endif
+                <tr>
+                    <td>Total Amount</td>
+                    <td>: {{ $currencyService->convert($order->total, $currency) }}</td>
+                </tr>
+                <tr>
+                    <td>Payment Method</td>
+                    <td>:
+                        @if ($order->payment_method == "cash_on_delivery")
+                            Cash on Delivery
+                        @elseif($order->payment_method == "paystack")
+                            Paystack
+                        @elseif($order->payment_method == "stripe")
+                            Stripe
+                        @endif
+                    </td>
+                </tr>
+                <tr>
+                    <td>Payment Status</td>
+                    <td>: {{ ucfirst($order->payment_status) }}</td>
+                </tr>
+            </table>
             </div>
           </div>
 
@@ -104,31 +160,31 @@
             <div class="shipping-info">
               <h4 class="text-center pb-4">SHIPPING INFORMATION</h4>
               <table class="table">
-                    <tr class="">
-                        <td>Full Name</td>
-                        <td> : {{$order->first_name}} {{$order->last_name}}</td>
-                    </tr>
-                    <tr>
-                        <td>Email</td>
-                        <td> : {{$order->email}}</td>
-                    </tr>
-                    <tr>
-                        <td>Phone No.</td>
-                        <td> : {{$order->phone}}</td>
-                    </tr>
-                    <tr>
-                        <td>Address</td>
-                        <td> : {{$order->address1}}, {{$order->address2}}</td>
-                    </tr>
-                    <tr>
-                        <td>Country</td>
-                        <td> : {{$order->country}}</td>
-                    </tr>
-                    <tr>
-                        <td>Post Code</td>
-                        <td> : {{$order->post_code}}</td>
-                    </tr>
-              </table>
+                <tr>
+                    <td>Full Name</td>
+                    <td>: {{ $order->first_name }} {{ $order->last_name }}</td>
+                </tr>
+                <tr>
+                    <td>Email</td>
+                    <td>: {{ $order->email }}</td>
+                </tr>
+                <tr>
+                    <td>Phone No.</td>
+                    <td>: {{ $order->phone }}</td>
+                </tr>
+                <tr>
+                    <td>Address</td>
+                    <td>: {{ $order->address }}</td>
+                </tr>
+                <tr>
+                    <td>Country</td>
+                    <td>: {{ $order->country }}</td>
+                </tr>
+                <tr>
+                    <td>Post Code</td>
+                    <td>: {{ $order->post_code }}</td>
+                </tr>
+            </table>
             </div>
           </div>
         </div>
