@@ -6,21 +6,31 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProductReview extends Model
 {
-    protected $fillable=['user_id','product_id','rate','review','status'];
+    protected $fillable = ['user_id', 'product_id', 'rate', 'review', 'status'];
 
-    public function user_info(){
-        return $this->hasOne('App\User','id','user_id');
+    // Review belongs to a User
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    public static function getAllReview(){
-        return ProductReview::with('user_info')->paginate(10);
-    }
-    public static function getAllUserReview(){
-        return ProductReview::where('user_id',auth()->user()->id)->with('user_info')->paginate(10);
-    }
-
-    public function product(){
-        return $this->hasOne(Product::class,'id','product_id');
+    // Review belongs to a Product
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
+    // Get all reviews (admin or public)
+    public static function getAllReview()
+    {
+        return self::with(['user', 'product'])->paginate(10);
+    }
+
+    // Get current logged-in user's reviews
+    public static function getAllUserReview()
+    {
+        return self::where('user_id', auth()->id())
+            ->with(['user', 'product'])
+            ->paginate(10);
+    }
 }

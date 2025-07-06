@@ -3,7 +3,7 @@
 @php
     $currency = session('currency', 'NGN');
 @endphp
-@section('title','E-SHOP || DASHBOARD')
+@section('title','Charis AgroBase || DASHBOARD')
 @section('main-content')
 <div class="container-fluid">
     @include('backend.layouts.notification')

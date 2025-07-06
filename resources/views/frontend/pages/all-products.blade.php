@@ -85,7 +85,7 @@
                                 <div class="col-lg-12">
                                     <h4 class="mb-3">Featured products</h4>
                                     @foreach ($featuredProducts as $fProduct)
-                                        <div class="d-flex align-items-center justify-content-start mb-3">
+                                        <div class="d-flex align-items-center justify-content-start mb-3 gap-2">
                                             <div class="rounded me-3" style="width: 100px; height: 100px;">
                                                 @php $photo = explode(",", $fProduct->photo); @endphp
                                                 <a href="{{ route("product-detail", $fProduct->slug) }}">
@@ -97,6 +97,35 @@
                                                 <a href="{{ route("product-detail", $fProduct->slug) }}">
                                                     <h6 class="mb-1">{{ $fProduct->name }}</h6>
                                                 </a>
+                                                @php
+                                                $avgRating = \App\Models\ProductReview::where("product_id", $fProduct->id)
+                                                    ->where("status", "active")
+                                                    ->avg("rate");
+
+                                                $avgRating = $avgRating ?? 8; // default to 8 if no rating
+                                                $fullStars = floor($avgRating / 2);
+                                                $hasHalfStar = fmod($avgRating, 2) >= 1;
+                                                $emptyStars = 5 - $fullStars - ($hasHalfStar ? 1 : 0);
+                                            @endphp
+
+                                            <div class="mb-2">
+                                                {{-- Full stars --}}
+                                                @for ($i = 0; $i < $fullStars; $i++)
+                                                    <i class="fa fa-star text-warning"></i>
+                                                @endfor
+
+                                                {{-- Half star --}}
+                                                @if ($hasHalfStar)
+                                                    <i class="fa fa-star-half-alt text-warning"></i>
+                                                @endif
+
+                                                {{-- Empty stars --}}
+                                                @for ($i = 0; $i < $emptyStars; $i++)
+                                                    <i class="fa fa-star text-muted"></i>
+                                                @endfor
+
+                                            </div>
+
                                                 <div class="d-flex">
                                                     <h6 class="fw-bold me-2">
                                                         {{ $currencyService->convert($fProduct->price, $currency) }}</h6>

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Auth;
 use UniSharp\LaravelFilemanager\Lfm;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AdminController;
@@ -13,9 +14,9 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\BlogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -100,6 +101,9 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/payment/paystack/{order}', [PaymentController::class, 'redirectToPaystack'])->name('paystack.redirect');
 Route::get('/payment/paystack/callback', [PaymentController::class, 'handleGatewayCallback'])->name('paystack.callback');
+
+Route::post('/product/review', [ProductReviewController::class, 'store'])->name('product.review.store')->middleware('auth');
+
 
 
 // Blog
@@ -187,8 +191,8 @@ Route::group(['prefix' => '/user', 'middleware' => ['user']], function () {
     Route::patch('user-post/comment/udpate/{id}', [HomeController::class, 'userCommentUpdate'])->name('user.post-comment.update');
 
     // Password Change
-    // Route::get('change-password', [HomeController::class, 'changePassword'])->name('user.change.password.form');
-    // Route::post('change-password', [HomeController::class, 'changPasswordStore'])->name('change.password');
+    Route::get('change-password', [HomeController::class, 'changePassword'])->name('user.change.password.form');
+    Route::post('change-password', [HomeController::class, 'changPasswordStore'])->name('change.password');
 
 });
 

@@ -35,7 +35,7 @@ class HomeController extends Controller
         ->where('user_id', Auth::id())
         ->latest()
         ->paginate(5);
-        
+
         return view('user.index', compact('orders'));
     }
 
@@ -45,19 +45,30 @@ class HomeController extends Controller
         return view('user.users.profile')->with('profile',$profile);
     }
 
-    public function profileUpdate(Request $request,$id){
-        // return $request->all();
-        $user=User::findOrFail($id);
-        $data=$request->all();
-        $status=$user->fill($data)->save();
-        if($status){
-            request()->session()->flash('success','Successfully updated your profile');
+    public function profileUpdate(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        if (auth()->id() !== $user->id) {
+            abort(403, 'Unauthorized');
         }
-        else{
-            request()->session()->flash('error','Please try again!');
+
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'photo' => 'nullable|string', // Laravel FileManager returns path as string
+        ]);
+
+        $user->name = $validatedData['name'];
+
+        if (isset($validatedData['photo'])) {
+            $user->photo = $validatedData['photo']; // Only update if provided
         }
-        return redirect()->back();
+
+        $user->save();
+
+        return back()->with('success', 'Profile updated successfully');
     }
+
 
     // Order
     public function orderIndex(){

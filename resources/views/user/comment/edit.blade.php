@@ -17,14 +17,14 @@
         <label for="comment">comment</label>
       <textarea name="comment" id="" cols="20" rows="10" class="form-control">{{$comment->comment}}</textarea>
       </div>
-      <div class="form-group">
+      {{-- <div class="form-group">
         <label for="status">Status :</label>
         <select name="status" id="" class="form-control">
           <option value="">--Select Status--</option>
           <option value="active" {{(($comment->status=='active')? 'selected' : '')}}>Active</option>
           <option value="inactive" {{(($comment->status=='inactive')? 'selected' : '')}}>Inactive</option>
         </select>
-      </div>
+      </div> --}}
       <button type="submit" class="btn btn-primary">Update</button>
     </form>
   </div>

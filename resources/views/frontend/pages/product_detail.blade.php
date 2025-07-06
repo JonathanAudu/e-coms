@@ -32,6 +32,41 @@
                         <div class="col-lg-6">
                             <h4 class="fw-bold mb-3">{{ ucfirst($product_detail->slug) }}</h4>
                             <p class="fw-bold mb-3">Category: {{ ucfirst($product_detail->category->slug) }}</p>
+                            @php
+                            $avgRating = \App\Models\ProductReview::where("product_id", $product_detail->id)
+                                ->where("status", "active")
+                                ->avg("rate");
+                        @endphp
+
+                        @if ($avgRating)
+                            @php
+                                $fullStars = floor($avgRating / 2);
+                                $hasHalfStar = fmod($avgRating, 2) >= 1;
+                                $emptyStars = 5 - $fullStars - ($hasHalfStar ? 1 : 0);
+                            @endphp
+
+                            <div class="mb-3">
+                                @for ($i = 0; $i < $fullStars; $i++)
+                                    <i class="fa fa-star text-warning"></i>
+                                @endfor
+
+                                @if ($hasHalfStar)
+                                    <i class="fa fa-star-half-alt text-warning"></i>
+                                @endif
+
+                                @for ($i = 0; $i < $emptyStars; $i++)
+                                    <i class="fa fa-star text-muted"></i>
+                                @endfor
+
+                                <small class="text-muted">({{ number_format($avgRating, 1) }}/10)</small>
+                            </div>
+                        @else
+                            <div class="mb-3">
+                                <small class="text-primary">No rating yet — be the first to rate it!</small>
+                            </div>
+                        @endif
+
+
                             <h5 class="fw-bold mb-3">{{ $currencyService->convert($product_detail->price, $currency) }}</h5>
 
                             <p class="mb-4">
@@ -44,7 +79,8 @@
                                         <i class="fa fa-minus"></i>
                                     </button>
                                 </div>
-                                <input type="text" class="form-control form-control-sm text-center border-0" value="1">
+                                <input type="text" class="form-control form-control-sm text-center border-0"
+                                    value="1">
                                 <div class="input-group-btn">
                                     <button class="btn btn-sm btn-plus rounded-circle bg-light border">
                                         <i class="fa fa-plus"></i>
@@ -52,30 +88,31 @@
                                 </div>
                             </div>
 
+
                             <div class="d-flex gap-2">
                                 {{-- Add to Cart --}}
                                 <form action="{{ route("cart.add") }}" method="POST" class="d-inline">
                                     @csrf
                                     <input type="hidden" name="product_id" value="{{ $product_detail->id }}">
                                     <button type="submit" class="btn border border-secondary rounded-circle text-primary"
-                                            data-bs-toggle="tooltip" data-bs-placement="top" title="Add to Cart">
+                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Add to Cart">
                                         <i class="fa fa-shopping-bag"></i>
                                     </button>
                                 </form>
 
                                 {{-- Add to Wishlist --}}
                                 @auth
-                                    <form action="{{ route("wishlist.store", $product_detail->id) }}" method="POST" class="d-inline">
+                                    <form action="{{ route("wishlist.store", $product_detail->id) }}" method="POST"
+                                        class="d-inline">
                                         @csrf
                                         <button type="submit" class="btn border border-danger rounded-circle text-danger"
-                                                data-bs-toggle="tooltip" data-bs-placement="top" title="Add to Wishlist">
+                                            data-bs-toggle="tooltip" data-bs-placement="top" title="Add to Wishlist">
                                             <i class="fa fa-heart"></i>
                                         </button>
                                     </form>
                                 @else
-                                    <a href="{{ route("login") }}"
-                                       class="btn border border-danger rounded-circle text-danger"
-                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Login to Wishlist">
+                                    <a href="{{ route("login") }}" class="btn border border-danger rounded-circle text-danger"
+                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Login to Wishlist">
                                         <i class="fa fa-heart"></i>
                                     </a>
                                 @endauth
@@ -98,22 +135,87 @@
                                     <p>{{ strip_tags($product_detail->description) }}</p>
                                 </div>
                                 <div class="tab-pane" id="nav-mission" role="tabpanel" aria-labelledby="nav-mission-tab">
-                                    <div class="d-flex">
-                                        <img src="img/avatar.jpg" class="img-fluid rounded-circle p-3"
-                                            style="width: 100px; height: 100px;" alt="">
-                                        <div class="">
-                                            <p class="mb-2" style="font-size: 14px;">April 12, 2024</p>
-                                            <div class="d-flex justify-content-between">
-                                                <h5>Jason Smith</h5>
+                                    @php
+                                        $reviews = \App\Models\ProductReview::where("product_id", $product_detail->id)
+                                            ->where("status", "active")
+                                            ->with("user")
+                                            ->latest()
+                                            ->get();
+                                    @endphp
 
+                                    {{-- Display existing reviews --}}
+                                    @foreach ($reviews as $review)
+                                        <div class="d-flex mb-3">
+                                            <img src="{{ $review->user->photo ?? asset("backend/img/avatar.png") }}"
+                                                class="img-fluid rounded-circle p-3" style="width: 60px; height: 60px;"
+                                                alt="">
+
+                                            <div>
+                                                <h6>{{ $review->user->name ?? "Anonymous" }}</h6>
+                                                <p class="mb-1 text-muted" style="font-size: 14px;">
+                                                    {{ $review->created_at->format("F d, Y") }}
+                                                </p>
+                                                <p class="mb-1">
+                                                    Rating:
+                                                    @php
+                                                        $fullStars = floor($review->rate / 2);
+                                                        $hasHalfStar = $review->rate % 2 !== 0;
+                                                        $emptyStars = 5 - $fullStars - ($hasHalfStar ? 1 : 0);
+                                                    @endphp
+
+                                                    {{-- Full stars --}}
+                                                    @for ($i = 0; $i < $fullStars; $i++)
+                                                        <i class="fa fa-star text-warning"></i>
+                                                    @endfor
+
+                                                    {{-- Half star --}}
+                                                    @if ($hasHalfStar)
+                                                        <i class="fa fa-star-half-alt text-warning"></i>
+                                                    @endif
+
+                                                    {{-- Empty stars --}}
+                                                    @for ($i = 0; $i < $emptyStars; $i++)
+                                                        <i class="fa fa-star text-muted"></i>
+                                                    @endfor
+
+                                                    <span class="text-muted ms-2">({{ $review->rate }}/10)</span>
+                                                </p>
+
+                                                <p>{{ $review->review }}</p>
                                             </div>
-                                            <p>The generated Lorem Ipsum is therefore always free from repetition injected
-                                                humour, or non-characteristic
-                                                words etc. Susp endisse ultricies nisi vel quam suscipit </p>
                                         </div>
-                                    </div>
+                                    @endforeach
 
+                                    {{-- Review submission form --}}
+                                    @auth
+                                        <hr>
+                                        <h5 class="mb-3">Write a Review</h5>
+                                        <form method="POST" action="{{ route("product.review.store") }}">
+                                            @csrf
+                                            <input type="hidden" name="product_id" value="{{ $product_detail->id }}">
+
+                                            <div class="form-group mb-2">
+                                                <label for="rate">Rating (1–10)</label>
+                                                <select name="rate" class="form-control" required>
+                                                    <option value="">--Rate--</option>
+                                                    @for ($i = 1; $i <= 10; $i++)
+                                                        <option value="{{ $i }}">{{ $i }}</option>
+                                                    @endfor
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group mb-2">
+                                                <label for="review">Your Review</label>
+                                                <textarea name="review" class="form-control" rows="3" required></textarea>
+                                            </div>
+
+                                            <button type="submit" class="btn btn-primary">Submit Review</button>
+                                        </form>
+                                    @else
+                                        <p><a href="{{ route("login") }}">Login</a> to write a review.</p>
+                                    @endauth
                                 </div>
+
                                 <div class="tab-pane" id="nav-vision" role="tabpanel">
                                     <p class="text-dark">Tempor erat elitr rebum at clita. Diam dolor diam ipsum et tempor
                                         sit. Aliqu diam
@@ -126,6 +228,8 @@
                         </div>
 
                     </div>
+
+
                 </div>
                 <div class="col-lg-4 col-xl-3">
                     <div class="row g-4 fruite">
@@ -151,7 +255,7 @@
                         <div class="col-lg-12">
                             <h4 class="mb-4">Featured products</h4>
                             @foreach ($featuredProducts as $fProduct)
-                                <div class="d-flex align-items-center justify-content-start">
+                                <div class="d-flex align-items-center justify-content-start mb-2">
 
 
                                     <div class="rounded me-3" style="width: 100px; height: 100px;">
@@ -167,6 +271,34 @@
                                         <a href="{{ route("product-detail", $fProduct->slug) }}">
                                             <h6 class="mb-2">{{ $fProduct->name }}</h6>
                                         </a>
+                                        @php
+                                        $avgRating = \App\Models\ProductReview::where("product_id", $fProduct->id)
+                                            ->where("status", "active")
+                                            ->avg("rate");
+
+                                        $avgRating = $avgRating ?? 8; // default to 8 if no rating
+                                        $fullStars = floor($avgRating / 2);
+                                        $hasHalfStar = fmod($avgRating, 2) >= 1;
+                                        $emptyStars = 5 - $fullStars - ($hasHalfStar ? 1 : 0);
+                                    @endphp
+
+                                    <div class="mb-2">
+                                        {{-- Full stars --}}
+                                        @for ($i = 0; $i < $fullStars; $i++)
+                                            <i class="fa fa-star text-warning"></i>
+                                        @endfor
+
+                                        {{-- Half star --}}
+                                        @if ($hasHalfStar)
+                                            <i class="fa fa-star-half-alt text-warning"></i>
+                                        @endif
+
+                                        {{-- Empty stars --}}
+                                        @for ($i = 0; $i < $emptyStars; $i++)
+                                            <i class="fa fa-star text-muted"></i>
+                                        @endfor
+
+                                    </div>
                                         <div class="d-flex mb-2">
                                             <h6 class="fw-bold me-2">
                                                 {{ $currencyService->convert($fProduct->price, $currency) }}</h6>
