@@ -147,6 +147,7 @@ Route::group(['prefix' => '/admin', 'middleware' => ['auth', 'admin']], function
     // Message
     Route::resource('/message', 'MessageController');
     Route::get('/message/five', [MessageController::class, 'messageFive'])->name('messages.five');
+    Route::post('/message/{id}/reply', [MessageController::class, 'reply'])->name('message.reply');
 
     // Order
     Route::resource('/order', 'OrderController');
@@ -192,8 +193,14 @@ Route::group(['prefix' => '/user', 'middleware' => ['user']], function () {
 
     // Password Change
     Route::get('change-password', [HomeController::class, 'changePassword'])->name('user.change.password.form');
-    Route::post('change-password', [HomeController::class, 'changPasswordStore'])->name('change.password');
+    Route::post('change-password', [HomeController::class, 'changPasswordStore'])->name('user.change.password');
 
+    Route::get('/contact-admin', function() {
+        return view('user.contact-admin');
+    })->name('user.contact-admin');
+    Route::post('/contact-admin', [\App\Http\Controllers\MessageController::class, 'store'])->name('user.contact-admin.send');
+
+    Route::get('/messages', [HomeController::class, 'userMessages'])->name('user.messages');
 });
 
 // Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']], function () {

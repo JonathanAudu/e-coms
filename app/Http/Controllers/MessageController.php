@@ -5,6 +5,8 @@ use Auth;
 use Illuminate\Http\Request;
 use App\Models\Message;
 use App\Events\MessageSent;
+use App\Notifications\MessageNotification;
+use App\Models\User;
 class MessageController extends Controller
 {
     /**
@@ -50,7 +52,16 @@ class MessageController extends Controller
         // return $request->all();
 
         $message=Message::create($request->all());
-            // return $message;
+        // Prepare notification details
+        $details = [
+            'subject' => $message->subject,
+            'sender' => $message->name,
+            'actionURL' => route('message.show', $message->id),
+        ];
+        // Notify all admins
+        // $admins = User::where('role', 'admin')->get();
+        // \Illuminate\Support\Facades\Notification::send($admins, new MessageNotification($details));
+        // ... existing code ...
         $data=array();
         $data['url']=route('message.show',$message->id);
         $data['date']=$message->created_at->format('F d, Y h:i A');
@@ -59,10 +70,11 @@ class MessageController extends Controller
         $data['phone']=$message->phone;
         $data['message']=$message->message;
         $data['subject']=$message->subject;
-        $data['photo']=Auth()->user()->photo;
-        // return $data;    
+        $data['photo']=Auth()->user()->photo ?? null;
+        // return $data;
         event(new MessageSent($data));
-        exit();
+        // Redirect back with success message for web form submissions
+        return redirect()->route('user.contact-admin')->with('success', 'Your message has been sent to the admin.');
     }
 
     /**
@@ -124,5 +136,17 @@ class MessageController extends Controller
             request()->session()->flash('error','Error occurred please try again');
         }
         return back();
+    }
+
+    public function reply(Request $request, $id)
+    {
+        $request->validate([
+            'reply' => 'required|string|min:2',
+        ]);
+        $message = Message::findOrFail($id);
+        $message->reply = $request->reply;
+        $message->replied_at = now();
+        $message->save();
+        return redirect()->back()->with('success', 'Reply sent to user successfully.');
     }
 }

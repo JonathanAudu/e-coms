@@ -11,7 +11,7 @@
       @method('PATCH')
       <div class="form-group">
         <label for="name">By:</label>
-        <input type="text" disabled class="form-control" value="{{$comment->user_info->name}}">
+        <input type="text" disabled class="form-control" value="{{$comment->user->name}}">
       </div>
       <div class="form-group">
         <label for="comment">comment</label>

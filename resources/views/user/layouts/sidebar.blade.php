@@ -39,7 +39,20 @@
             <i class="fas fa-comments"></i>
             <span>Reviews</span></a>
     </li>
-    
+    <!-- Contact Admin -->
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('user.contact-admin') }}">
+            <i class="fas fa-envelope"></i>
+            <span>Contact Admin</span>
+        </a>
+    </li>
+    <!-- My Messages -->
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('user.messages') }}">
+            <i class="fas fa-inbox"></i>
+            <span>My Messages</span>
+        </a>
+    </li>
 
     <!-- Divider -->
     <hr class="sidebar-divider">

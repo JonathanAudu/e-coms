@@ -44,11 +44,12 @@ class OrderController extends Controller
         $data=$request->all();
         // return $request->status;
         if($request->status=='delivered'){
-            foreach($order->cart as $cart){
-                $product=$cart->product;
-                // return $product;
-                $product->stock -=$cart->quantity;
-                $product->save();
+            foreach($order->orderItems as $item){
+                $product = $item->product;
+                if ($product) {
+                    $product->stock -= $item->quantity;
+                    $product->save();
+                }
             }
         }
         $status=$order->fill($data)->save();

@@ -1,38 +1,28 @@
-<div id="notifications">
-    <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        <i class="fas fa-bell fa-fw"></i>
-        <!-- Counter - Alerts -->
-        <span class="badge badge-danger badge-counter">
-            {{-- @if(count(Auth::user()->unreadNotifications) >5 )<span data-count="5" class="count">5+</span>
-            @else
-                <span class="count" data-count="{{count(Auth::user()->unreadNotifications)}}">{{count(Auth::user()->unreadNotifications)}}</span>
-            @endif --}}
-        </span>
-      </a>
-      <!-- Dropdown - Alerts -->
-      <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
-        <h6 class="dropdown-header">
-          Notifications Center
-        </h6>
-        {{-- @foreach(Auth::user()->unreadNotifications as $notification) --}}
-    <a class="dropdown-item d-flex align-items-center" target="_blank" href="">
-                <div class="mr-3">
-                    <div class="icon-circle bg-primary">
-                    {{-- <i class="fas {{$notification->data['fas']}} text-white"></i> --}}
-                    </div>
-                </div>
-                {{-- <div>
-                    <div class="small text-gray-500">{{$notification->created_at->format('F d, Y h:i A')}}</div>
-                    <span class="@if($notification->unread()) font-weight-bold @else small text-gray-500 @endif">{{$notification->data['title']}}</span>
-                </div> --}}
-            </a>
-            {{-- @if($loop->index+1==5)
-                @php
-                    break;
-                @endphp
-            @endif
-        @endforeach --}}
+@extends('backend.layouts.master')
 
-        {{-- <a class="dropdown-item text-center small text-gray-500" href="{{route('all.notification')}}">Show All Notifications</a> --}}
-      </div>
+@section('main-content')
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            Notification Details
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">{{ $notification->data['title'] ?? 'No Title' }}</h5>
+            <p class="card-text">
+                <strong>Action URL:</strong>
+                <a href="{{ $notification->data['actionURL'] ?? '#' }}" target="_blank">
+                    {{ $notification->data['actionURL'] ?? 'N/A' }}
+                </a>
+            </p>
+            <p>
+                <strong>Icon:</strong>
+                <i class="fas {{ $notification->data['fas'] ?? '' }}"></i>
+            </p>
+            <p>
+                <strong>Received:</strong>
+                {{ $notification->created_at->format('F d, Y h:i A') }}
+            </p>
+        </div>
+    </div>
 </div>
+@endsection

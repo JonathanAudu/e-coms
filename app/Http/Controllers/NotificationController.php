@@ -10,10 +10,12 @@ class NotificationController extends Controller
         return view('backend.notification.index');
     }
     public function show(Request $request){
-        $notification=Auth()->user()->notifications()->where('id',$request->id)->first();
-        if($notification){
+        $notification = Auth()->user()->notifications()->where('id', $request->id)->first();
+        if ($notification) {
             $notification->markAsRead();
-            return redirect($notification->data['actionURL']);
+            return view('backend.notification.show', compact('notification'));
+        } else {
+            return redirect()->route('all.notification')->with('error', 'Notification not found');
         }
     }
     public function delete($id){

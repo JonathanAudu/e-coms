@@ -243,5 +243,12 @@ class HomeController extends Controller
         return redirect()->route('user')->with('success','Password successfully changed');
     }
 
+    public function userMessages()
+    {
+        $messages = \App\Models\Message::where('email', auth()->user()->email)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+        return view('user.message', compact('messages'));
+    }
 
 }

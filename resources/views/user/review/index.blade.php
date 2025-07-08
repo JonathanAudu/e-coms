@@ -18,7 +18,6 @@
           <thead>
             <tr>
               <th>S.N.</th>
-              <th>Review By</th>
               <th>Product Title</th>
               <th>Review</th>
               <th>Rate</th>
@@ -27,34 +26,35 @@
               <th>Action</th>
             </tr>
           </thead>
-          <tfoot>
-            <tr>
-              <th>S.N.</th>
-              <th>Review By</th>
-              <th>Product Title</th>
-              <th>Review</th>
-              <th>Rate</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Action</th>
-              </tr>
-          </tfoot>
+
           <tbody>
             @foreach($reviews as $review)
                 <tr>
-                    <td>{{$review->id}}</td>
-                    <td>{{$review->user_info['name']}}</td>
-                    <td>{{$review->product->title}}</td>
+                    <td>{{ ($reviews->currentPage() - 1) * $reviews->perPage() + $loop->iteration }}</td>
+                    <td>{{$review->product->name}}</td>
                     <td>{{$review->review}}</td>
                     <td>
                      <ul style="list-style:none" class="d-flex">
-                          @for($i=1; $i<=5;$i++)
-                          @if($review->rate >=$i)
-                            <li style="float:left;color:#106115;"><i class="fa fa-star"></i></li>
-                          @else
-                            <li style="float:left;color:#106115;"><i class="far fa-star"></i></li>
-                          @endif
-                        @endfor
+                        @php
+                        $fullStars = floor($review->rate / 2);
+                        $hasHalfStar = $review->rate % 2 !== 0;
+                        $emptyStars = 5 - $fullStars - ($hasHalfStar ? 1 : 0);
+                    @endphp
+
+                    {{-- Full stars --}}
+                    @for ($i = 0; $i < $fullStars; $i++)
+                        <i class="fa fa-star text-warning"></i>
+                    @endfor
+
+                    {{-- Half star --}}
+                    @if ($hasHalfStar)
+                        <i class="fa fa-star-half-alt text-warning"></i>
+                    @endif
+
+                    {{-- Empty stars --}}
+                    @for ($i = 0; $i < $emptyStars; $i++)
+                        <i class="fa fa-star text-muted"></i>
+                    @endfor
                      </ul>
                     </td>
                     <td>{{$review->created_at->format('M d D, Y g: i a')}}</td>
